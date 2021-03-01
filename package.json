@@ -4,8 +4,21 @@
   "description": "Creating a MERN social media website",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "cd client && npm test",
+    "start": "concurrently \"npm run client\" \"npm run server\"",
+    "start:watch": "concurrently \"npm run client\" \"npm run server:watch\"",
+    "server": "cd backend && node server.js",
+    "server:watch": "cd backend && nodemon server.js",
+    "client": "cd client && npm start",
+    "heroku-postbuild": "cd client && npm install && npm run build"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongodb": "^3.6.4",
+    "mongoose": "^5.11.18"
+  }
 }
