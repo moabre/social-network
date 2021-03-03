@@ -48,6 +48,7 @@ const list = async (req, res) => {
   res.status(200).json(users);
 };
 
+// Login
 const login = async (req, res) => {
   //Validate the data
   const { errors, isValid } = validateLogin(req.body);
@@ -92,4 +93,126 @@ const userByID = async (req, res) => {
     });
   }
 };
-module.exports = { create, list, login, userByID };
+
+//delete a user
+const removeUser = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const user = await User.deleteOne({ _id: id });
+    res.status(200).json({ message: 'Successfuly deleted user' });
+  } catch (err) {
+    res.status(500).json({ message: err });
+  }
+};
+
+//Update a users info
+const updateUser = async (req, res) => {
+  const { id } = req.params;
+  const user = await User.findOneAndUpdate(
+    { _id: id },
+    {
+      avatar: req.body.avatar,
+      bio: req.body.bio,
+      email: req.body.email,
+      name: req.body.name,
+      showEmail: req.body.showEmail,
+    },
+    { new: true, upsert: true, setDefaultsOnInsert: true },
+    (err) => {
+      if (err != null && err.name === 'MongoError' && err.code === 11000) {
+        return res
+          .status(500)
+          .send({ message: 'This email is already in use.' });
+      }
+    }
+  );
+  if (!user) return res.status(404).json({ message: 'User not found' });
+
+  const token = jwt.sign(
+    {
+      avatar: user.avatar,
+      bio: user.bio,
+      createdAt: user.createdAt,
+      name: user.name,
+      email: user.email,
+      showEmail: user.showEmail,
+      userId: user._id,
+    },
+    process.env.TOKEN_CODE,
+    { expiresIn: '24h' }
+  );
+  return res.json({ user, token });
+};
+
+//Add user to list of users you follow
+const addUserFollowing = async (req, res) => {
+  const { id } = req.params;
+  if (!req.body.idToFollow)
+    return res.status(404).json({ message: 'No ID found' });
+  try {
+    await User.findByIdAndUpdate(
+      id,
+      {
+        $addToSet: { following: req.body.idToFollow },
+      },
+      { new: true, upsert: true },
+      (err, doc) => {
+        if (err) return res.status(400).json(err);
+        return res.status(201).json(doc);
+      }
+    );
+  } catch (err) {
+    return res.status(500).json(err);
+  }
+};
+//Remove a user from list of following
+const removeUserFollowing = async (req, res) => {
+  const { id } = req.params;
+  if (!req.body.idToUnfollow)
+    return res.status(404).json({ message: 'No ID found' });
+  try {
+    await User.findByIdAndUpdate(
+      id,
+      { $pull: { following: req.body.idToUnfollow } },
+      { new: true, upsert: true },
+      (err, doc) => {
+        if (err) return res.status(400).json(err);
+        return res.status(201).json(doc);
+      }
+    );
+  } catch (err) {
+    return res.status(500).json(err);
+  }
+};
+
+//Remove a user from list of users following you
+const removeFollower = async (req, res) => {
+  const { id } = req.params;
+  if (!req.body.unfollowerId)
+    return res.status(404).json({ message: 'No ID found' });
+  try {
+    await User.findByIdAndUpdate(
+      id,
+      { $pull: { followers: req.body.unfollowerId } },
+      { new: true, upsert: true },
+      (err, doc) => {
+        if (err) return res.status(400).json(err);
+        return res.status(201).json(doc);
+      }
+    );
+  } catch (err) {
+    return res.status(500).json(err);
+  }
+};
+
+module.exports = {
+  create,
+  list,
+  login,
+  userByID,
+  removeUser,
+  updateUser,
+  addUserFollowing,
+  removeUserFollowing,
+  removeFollower,
+};
