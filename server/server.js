@@ -5,19 +5,19 @@ const path = require('path');
 const logger = require('morgan');
 const app = express();
 const mongoose = require('mongoose');
-const users = require('./routes/userRoute');
+
+dotenv.config();
 
 //Port to listen on
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 //Enable CORS
 app.use(cors());
 
 //Import Routes
-// const authRoute = require('./routes/auth');
-// const postRoute = require('./routes/post');
-
-dotenv.config();
+const auth = require('./routes/authRoute');
+const users = require('./routes/userRoute');
+const posts = require('./routes/postRoute');
 
 //Connect to DB
 mongoose.connect(
@@ -26,7 +26,7 @@ mongoose.connect(
     useUnifiedTopology: true,
     useNewUrlParser: true,
   },
-  () => console.log('connected')
+  () => console.log('connected to database')
 );
 
 //Middleware
@@ -35,7 +35,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(logger('dev'));
 
 //Route Middlewares
-app.use('/user', users);
-// app.use('/api/posts', postRoute);
+app.use('/', users);
+app.use('/', posts);
+app.use('/', auth);
 
 app.listen(PORT, () => console.log(`server up and running on ${PORT} `));

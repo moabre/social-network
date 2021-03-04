@@ -1,14 +1,34 @@
 const userCtrl = require('../controllers/userController');
 const router = require('express').Router();
+const authCtrl = require('../controllers/authControllers');
 
-router.get('/', userCtrl.list);
-router.get('/:id', userCtrl.userByID);
-router.post('/signup', userCtrl.create);
-router.post('/login', userCtrl.login);
-router.patch('/:id', userCtrl.updateUser);
-router.patch('/following/:id', userCtrl.addUserFollowing);
-router.patch('/unfollowing/:id', userCtrl.removeUserFollowing);
-router.patch('/unfollowers/:id', userCtrl.removeFollower);
-router.delete('/:id', userCtrl.removeUser);
+router.route('/api/users').get(userCtrl.list).post(userCtrl.create);
+
+router
+  .route('/api/users/follow')
+  .put(
+    authCtrl.requiresSignin,
+    userCtrl.addUserFollowing,
+    userCtrl.addFollower
+  );
+router
+  .route('/api/users/unfollow')
+  .put(
+    authCtrl.requiresSignin,
+    userCtrl.removeUserFollowing,
+    userCtrl.removeFollower
+  );
+
+router
+  .route('/api/users/findpeople/:userId')
+  .get(authCtrl.requiresSignin, userCtrl.recommendPeople);
+
+router
+  .route('/api/users/:userId')
+  .get(authCtrl.requiresSignin, userCtrl.specificUser)
+  .put(authCtrl.requiresSignin, authCtrl.hasAuth, userCtrl.updateUser)
+  .delete(authCtrl.requiresSignin, authCtrl.hasAuth, userCtrl.removeUser);
+
+router.param('userId', userCtrl.userById);
 
 module.exports = router;

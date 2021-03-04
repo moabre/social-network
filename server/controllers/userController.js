@@ -1,9 +1,7 @@
 const User = require('../models/userModel');
 const bcrypt = require('bcrypt');
-const express = require('express');
 const jwt = require('jsonwebtoken');
 const validatesSignUp = require('../validation/validateSignUp');
-const validateLogin = require('../validation/validateLogin');
 
 const create = async (req, res) => {
   //Validate the data
@@ -42,49 +40,32 @@ const create = async (req, res) => {
   }
 };
 
+//Load user and append to req
+const userById = async (req, res, next, id) => {
+  try {
+    const user = await User.findById(id)
+      .populate('following', '_id name')
+      .populate('follwers', '_id name')
+      .exec();
+    if (!user) return res.status(400).json({ error: 'User not found' });
+    req.profile = user;
+    next();
+  } catch (err) {
+    return res.status(400).json({
+      error: 'Could not get user',
+    });
+  }
+};
+
 // Get all users
 const list = async (req, res) => {
-  const users = await User.find();
+  const users = await User.find().select('name email updated created');
   res.status(200).json(users);
 };
 
-// Login
-const login = async (req, res) => {
-  //Validate the data
-  const { errors, isValid } = validateLogin(req.body);
-  if (!isValid) {
-    return res.status(400).json(errors);
-  }
-  //See if email exists
-  const user = await User.findOne({ email: req.body.email });
-  if (!user) return res.status(400).send('Invalid email or password');
-
-  //Check to see if password is correct
-  const validPassword = await bcrypt.compare(req.body.password, user.password);
-  if (!validPassword) return res.status(400).send('Invalid email or password');
-
-  //create and assign jwt token
-  const token = jwt.sign(
-    {
-      avatar: user.avatar,
-      createdAt: user.createdAt,
-      name: user.name,
-      email: user.email,
-      showEmail: user.showEmail,
-      userId: user._id,
-    },
-    process.env.TOKEN_CODE,
-    { expiresIn: '1h' }
-  );
-  res.header('auth-token', token).status(200).json({
-    message: 'Auth Successful',
-  });
-};
-
 //get user by id
-const userByID = async (req, res) => {
-  const { id } = req.params;
-  const user = await User.findById(id);
+const specificUser = async (req, res) => {
+  const user = req.profile;
   if (user) {
     res.json({ user });
   } else {
@@ -136,22 +117,21 @@ const updateUser = async (req, res) => {
       name: user.name,
       email: user.email,
       showEmail: user.showEmail,
-      userId: user._id,
+      _id: user._id,
     },
     process.env.TOKEN_CODE,
     { expiresIn: '24h' }
   );
-  return res.json({ user, token });
+  return res.header('authorization', token).status(200).json({ user });
 };
 
 //Add user to list of users you follow
-const addUserFollowing = async (req, res) => {
-  const { id } = req.params;
+const addUserFollowing = async (req, res, next) => {
   if (!req.body.idToFollow)
     return res.status(404).json({ message: 'No ID found' });
   try {
     await User.findByIdAndUpdate(
-      id,
+      req.body.userId,
       {
         $addToSet: { following: req.body.idToFollow },
       },
@@ -161,18 +141,36 @@ const addUserFollowing = async (req, res) => {
         return res.status(201).json(doc);
       }
     );
+    next();
   } catch (err) {
     return res.status(500).json(err);
   }
 };
+
+const addFollower = async (req, res) => {
+  try {
+    const result = await User.findByIdAndUpdate(
+      req.body.followId,
+      { $addToSet: { followers: req.body.userId } },
+      { new: true }
+        .populate('following', '_id name')
+        .populate('followers', '_id name')
+        .exec()
+    );
+    res.json(result);
+  } catch (err) {
+    return res.status(400).json({
+      error: 'Could not add follower',
+    });
+  }
+};
 //Remove a user from list of following
-const removeUserFollowing = async (req, res) => {
-  const { id } = req.params;
+const removeUserFollowing = async (req, res, next) => {
   if (!req.body.idToUnfollow)
     return res.status(404).json({ message: 'No ID found' });
   try {
     await User.findByIdAndUpdate(
-      id,
+      req.body.userId,
       { $pull: { following: req.body.idToUnfollow } },
       { new: true, upsert: true },
       (err, doc) => {
@@ -180,6 +178,7 @@ const removeUserFollowing = async (req, res) => {
         return res.status(201).json(doc);
       }
     );
+    next();
   } catch (err) {
     return res.status(500).json(err);
   }
@@ -187,32 +186,49 @@ const removeUserFollowing = async (req, res) => {
 
 //Remove a user from list of users following you
 const removeFollower = async (req, res) => {
-  const { id } = req.params;
   if (!req.body.unfollowerId)
     return res.status(404).json({ message: 'No ID found' });
   try {
-    await User.findByIdAndUpdate(
-      id,
-      { $pull: { followers: req.body.unfollowerId } },
-      { new: true, upsert: true },
+    const result = await User.findByIdAndUpdate(
+      req.body.idToUnfollow,
+      { $pull: { followers: req.body.userId } },
+      { new: true, upsert: true }
+        .populate('following', '_id name')
+        .populate('followers', '_id name')
+        .exec(),
       (err, doc) => {
         if (err) return res.status(400).json(err);
         return res.status(201).json(doc);
       }
     );
+    res.json(result);
   } catch (err) {
     return res.status(500).json(err);
   }
 };
 
+const recommendPeople = async (req, res) => {
+  const following = req.profile.following;
+  following.push(req.profile._id);
+  try {
+    let users = await User.find({ _id: { $nin: following } }).select('name');
+    res.json(users);
+  } catch (err) {
+    return res.status(400).json({
+      error: 'Ran into an issue finding people',
+    });
+  }
+};
 module.exports = {
   create,
   list,
-  login,
-  userByID,
+  userById,
+  specificUser,
   removeUser,
   updateUser,
   addUserFollowing,
+  addFollower,
   removeUserFollowing,
   removeFollower,
+  recommendPeople,
 };

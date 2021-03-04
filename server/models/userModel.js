@@ -4,26 +4,32 @@ const { Schema } = mongoose;
 
 const UserSchema = new Schema({
   avatar: String,
-  bio: String,
-  createdAt: {
-    type: Number,
-    required: true,
+  bio: {
+    type: String,
+    trim: true,
   },
+  created: {
+    type: Date,
+    default: Date.now,
+  },
+  updated: Date,
   email: {
     type: String,
     required: true,
+    trim: true,
     unique: true,
     match: /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
     min: 6,
   },
   followers: {
-    type: [String],
+    type: [{ type: mongoose.Schema.ObjectId, ref: 'User' }],
   },
   following: {
-    type: [String],
+    type: [{ type: mongoose.Schema.ObjectId, ref: 'User' }],
   },
   name: {
     type: String,
+    trim: true,
     required: true,
   },
   password: {
