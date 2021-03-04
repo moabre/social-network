@@ -1,16 +1,44 @@
 const Post = require('../models/postModel');
 const { ObjectID } = require('mongodb');
 
-//get all posts
-const allPosts = async (req, res) => {
-  const posts = await Post.find().sort({ timestamp: -1 });
-  res.status(200).json(posts);
+//get all posts by user
+const postsByUser = async (req, res) => {
+  try {
+    const posts = await Post.find({ postedBy: req.profile._id })
+      .populate('comments.postedBy', '_id name')
+      .populate('postedBy', '_id name')
+      .sort({ timestamp: -1 })
+      .exec();
+    return res.status(200).json(posts);
+  } catch (err) {
+    return res.status(400).json({
+      error: err,
+    });
+  }
+};
+
+//get news feed
+const postNewsFeed = async (req, res) => {
+  const following = req.profile.following;
+  following.push(req.profile._id);
+  try {
+    const posts = await Post.find({ postedBy: { $in: req.profile.following } })
+      .populate('comments.postedBy', '_id name')
+      .populate('postedBy', '_id name')
+      .sort({ timestamp: -1 })
+      .exec();
+    return res.status(200).json(posts);
+  } catch (err) {
+    return res.status(400).json({
+      error: err,
+    });
+  }
 };
 
 //create a post
 const post = async (req, res) => {
   const newPost = new Post({
-    authorId: req.body.authorId,
+    postedBy: req.body.postedBy,
     avatar: req.body.avatar || '',
     comments: [],
     likers: [],
@@ -42,100 +70,69 @@ const postById = async (req, res, next, id) => {
   }
 };
 
-//editing anything within a post
-const editPost = async (req, res) => {
-  const { id } = req.params;
-  if (!ObjectID.isValid(id)) {
-    return res.status(404).json({ message: 'the content does not exist' });
+//like a post
+const like = async (req, res) => {
+  try {
+    const result = await Post.findByIdAndUpdate(
+      req.body.postId,
+      { $inc: { likesCount: 1 }, $addToSet: { likers: req.body.userId } },
+      { new: true }
+    );
+    return res.status(200).json(result);
+  } catch (err) {
+    return res.status(400).json({
+      err,
+    });
   }
-  //adding likes and liker to comment data
-  if (req.body.action === 'like') {
-    try {
-      return Post.findByIdAndUpdate(
-        id,
-        {
-          $inc: { likesCount: 1 },
-          $addToSet: { likers: req.body.id },
-        },
-        { new: true },
-        (err, post) => {
-          if (err) return res.status(400).send(err);
-          return res.send(post);
-        }
-      );
-    } catch (err) {
-      return res.status(400).send(err);
-    }
-  }
-  //reducing like from comment data
-  if (req.body.action === 'unlike') {
-    try {
-      return Post.findByIdAndUpdate(
-        id,
-        {
-          $inc: { likesCount: -1 },
-          $pull: { likers: req.body.id },
-        },
-        { new: true },
-        (err, post) => {
-          if (err) return res.status(400).send(err);
-          return res.send(post);
-        }
-      );
-    } catch (err) {
-      return res.status(400).send(err);
-    }
-  }
-  //adding the comment to the post data
-  if (req.body.action === 'comment') {
-    try {
-      return Post.findByIdAndUpdate(
-        id,
-        {
-          $push: {
-            comments: {
-              commenterId: req.body.commenterId,
-              text: req.body.text,
-              timestamp: new Date().getTime(),
-            },
-          },
-        },
-        { new: true },
-        (err, post) => {
-          if (err) return res.status(400).send(err);
-          return res.send(post);
-        }
-      );
-    } catch (err) {
-      return res.status(400).send(err);
-    }
-  }
-  //deleting the comment to the post data
-  if (req.body.action === 'deleteComment') {
-    try {
-      return Post.findByIdAndUpdate(
-        id,
-        {
-          $pull: {
-            comments: {
-              _id: req.body.commentId,
-            },
-          },
-        },
-        { new: true },
-        (err, post) => {
-          if (err) return res.status(400).send(err);
-          return res.send(post);
-        }
-      );
-    } catch (err) {
-      return res.status(400).send(err);
-    }
+};
+//unlike a post
+const unlike = async (req, res) => {
+  try {
+    const results = Post.findByIdAndUpdate(
+      req.body.postId,
+      {
+        $inc: { likesCount: -1 },
+        $pull: { likers: req.body.userId },
+      },
+      { new: true },
+      (err, post) => {
+        if (err) return res.status(400).send(err);
+        return res.send(post);
+      }
+    );
+    return res.status(200).json(results);
+  } catch (err) {
+    return res.status(400).send(err);
   }
 };
 
+//Deleteing a comment
+const deleteComment = async (req, res) => {
+  const comment = req.body.comment;
+
+  try {
+    const result = await Post.findByIdAndUpdate(
+      req.body.postId,
+      {
+        $pull: {
+          comments: {
+            _id: comment._id,
+          },
+        },
+      },
+      { new: true }
+    )
+      .populate('comments.postedBy', '_id name')
+      .populate('postedBy', '_id name')
+      .exec();
+    return res.status(200).json(result);
+  } catch (err) {
+    return res.status(400).send(err);
+  }
+};
+//posting a comment
 const comment = async (req, res) => {
-  const comment = req.body.text;
+  const comment = req.body.comment;
   comment.postedBy = req.body.userId;
   try {
     const result = await Post.findByIdAndUpdate(
@@ -152,22 +149,22 @@ const comment = async (req, res) => {
       .populate('comments.postedBy', '_id name')
       .populate('postedBy', '_id name')
       .exec();
-    res.status(200).json(result);
+    return res.status(200).json(result);
   } catch (err) {
     return res.status(400).send(err);
   }
 };
-
+//delete post
 const deletePost = async (req, res) => {
-  const { id } = req.params;
+  const post = req.post;
   try {
-    const post = await Post.findByIdAndDelete(id);
-    return res.status(200).json({ success: true });
+    const deletedPost = await post.remove();
+    return res.status(200).json(deletedPost);
   } catch (err) {
     return res.status(404).send(err);
   }
 };
-
+//auth to check if it is current poster
 const authPoster = (req, res, next) => {
   const isPoster = req.post && req.auth && req.postedBy._id == req.auth._id;
   if (!isPoster) {
@@ -179,9 +176,13 @@ const authPoster = (req, res, next) => {
 };
 
 module.exports = {
-  allPosts,
+  postNewsFeed,
+  postsByUser,
   comment,
-  editPost,
+  post,
+  like,
+  unlike,
+  deleteComment,
   deletePost,
   postById,
   authPoster,
