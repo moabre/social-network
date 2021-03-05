@@ -1,6 +1,7 @@
 import axios from 'axios';
 import jwtDecode from 'jwt-decode';
 import setAuthToken from '../setAuthToken';
+import { useDispatch } from 'react-redux';
 import {
   INDICATE_NO_ERRORS,
   GET_ERRORS,
@@ -28,7 +29,7 @@ export const registerUser = (user) => (dispatch) => {
 
 export const loginUser = (user) => (dispatch) => {
   axios
-    .post('/auth/signin', user)
+    .post('http://localhost:5000/auth/signin', user)
     .then((res) => {
       const { token } = res.data;
       localStorage.setItem('jwtToken', token);
@@ -37,10 +38,10 @@ export const loginUser = (user) => (dispatch) => {
       dispatch(setCurrentUser(decoded));
     })
     .catch((err) => {
-      dispatch({
-        type: GET_ERRORS,
-        payload: err.response.data,
-      });
+      //dispatch({
+      //   type: GET_ERRORS,
+      //   payload: err.response,
+      // });
     });
 };
 

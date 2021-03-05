@@ -1,23 +1,26 @@
 import './App.css';
+import { createBrowserHistory } from 'history';
+import { Router, Route, Switch, BrowserRouter } from 'react-router-dom';
+import { ThemeProvider } from '@material-ui/styles';
+import theme from './theme';
+import Home from './components/Home';
+import Signup from './components/SignUp';
 
-function App() {
+export const history = createBrowserHistory();
+
+const App = () => {
   return (
-    <div className='App'>
-      <header className='App-header'>
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className='App-link'
-          href='https://reactjs.org'
-          target='_blank'
-          rel='noopener noreferrer'
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter>
+      <ThemeProvider theme={theme}>
+        <Router history={history}>
+          <Switch>
+            <Route exact path='/' component={Home} />
+            <Route patch='/signup' component={Signup} />
+          </Switch>
+        </Router>
+      </ThemeProvider>
+    </BrowserRouter>
   );
-}
+};
 
 export default App;

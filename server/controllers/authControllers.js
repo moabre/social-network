@@ -27,9 +27,13 @@ const login = async (req, res) => {
     process.env.TOKEN_CODE,
     { expiresIn: '1h' }
   );
-  res.header('Authorization', `Bearer ${token}`).status(200).json({
-    message: 'Auth Successful',
-  });
+  res
+    .header('Authorization', `Bearer ${token}`)
+    .status(200)
+    .json({
+      message: 'Auth Successful',
+      token: `Bearer ${token}`,
+    });
 };
 
 const requiresSignin = expressJwt({
