@@ -1,5 +1,4 @@
 const Post = require('../models/postModel');
-const { ObjectID } = require('mongodb');
 
 //get all posts by user
 const postsByUser = async (req, res) => {

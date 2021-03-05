@@ -27,6 +27,7 @@ router
   .route('/api/users/:userId')
   .get(authCtrl.requiresSignin, userCtrl.specificUser)
   .put(authCtrl.requiresSignin, authCtrl.hasAuth, userCtrl.updateUser)
+  .patch(authCtrl.requiresSignin, authCtrl.hasAuth, userCtrl.updateUser)
   .delete(authCtrl.requiresSignin, authCtrl.hasAuth, userCtrl.removeUser);
 
 router.param('userId', userCtrl.userById);
