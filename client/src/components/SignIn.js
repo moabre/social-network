@@ -6,48 +6,12 @@ import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import Icon from '@material-ui/core/Icon';
-import { makeStyles } from '@material-ui/core/styles';
+import SignInStyles from '../styles/SignInStyles';
 import { useDispatch } from 'react-redux';
 import { loginUser } from '../actions/authActions';
 
-const useStyles = makeStyles((theme) => ({
-  card: {
-    maxWidth: 600,
-    margin: 'auto',
-    textAlign: 'center',
-    marginTop: theme.spacing(5),
-    paddingBottom: theme.spacing(2),
-  },
-  error: {
-    verticalAlign: 'middle',
-  },
-  title: {
-    marginTop: theme.spacing(2),
-    color: theme.palette.openTitle,
-  },
-  textField: {
-    marginLeft: theme.spacing(1),
-    marginRight: theme.spacing(1),
-    width: 300,
-  },
-  submit: {
-    margin: 'auto',
-    marginBottom: theme.spacing(2),
-    backgroundColor: '#166FE5',
-  },
-  button: {
-    backgroundColor: '#30ff30',
-    color: 'white',
-    margin: 'auto',
-    marginBottom: theme.spacing(2),
-    '&:hover': {
-      backgroundColor: 'green',
-    },
-  },
-}));
-
 export default function Signin(props) {
-  const classes = useStyles();
+  const classes = SignInStyles();
   const dispatch = useDispatch();
   const [values, setValues] = useState({
     email: '',
@@ -66,7 +30,7 @@ export default function Signin(props) {
   };
 
   const redirectSignIn = () => {
-    window.location.href = '/signin';
+    window.location.href = '/signup';
   };
 
   const handleChange = (name) => (event) => {

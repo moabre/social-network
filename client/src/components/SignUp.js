@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
@@ -13,8 +13,13 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import { Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { registerUser } from '../actions/authActions';
 
 const useStyles = makeStyles((theme) => ({
+  root: {
+    marginTop: '15%',
+  },
   card: {
     maxWidth: 600,
     margin: 'auto',
@@ -27,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
   },
   title: {
     marginTop: theme.spacing(2),
-    color: theme.palette.openTitle,
+    color: '#166FE5',
   },
   textField: {
     marginLeft: theme.spacing(1),
@@ -37,14 +42,29 @@ const useStyles = makeStyles((theme) => ({
   submit: {
     margin: 'auto',
     marginBottom: theme.spacing(2),
+    backgroundColor: '#166FE5',
+    '&:hover': {
+      backgroundColor: '#297cea',
+    },
+  },
+  signin: {
+    backgroundColor: '#166FE5',
+    '&:hover': {
+      backgroundColor: '#297cea',
+    },
   },
 }));
 
 export default function Signup() {
   const classes = useStyles();
+  const dispatch = useDispatch();
+  const state = useSelector((state) => state);
+  const { error } = state;
+
   const [values, setValues] = useState({
     name: '',
     password: '',
+    passwordConfirm: '',
     email: '',
     open: false,
     error: '',
@@ -59,21 +79,28 @@ export default function Signup() {
       name: values.name || undefined,
       email: values.email || undefined,
       password: values.password || undefined,
+      passwordConfirm: values.passwordConfirm || undefined,
     };
-    // create(user).then((data) => {
-    //   if (data.error) {
-    //     setValues({ ...values, error: data.error });
-    //   } else {
-    //     setValues({ ...values, error: '', open: true });
-    //   }
-    // });
+    dispatch(registerUser(user));
   };
 
+  const home = () => {
+    window.location.href = '/';
+  };
+
+  useEffect(() => {
+    if (error.success) {
+      setValues({ ...values, open: true });
+    } else if (JSON.stringify(error) !== '{}') {
+      setValues({ ...values, error: error });
+    }
+  }, [error]);
+
   return (
-    <div>
+    <div className={classes.root}>
       <Card className={classes.card}>
         <CardContent>
-          <Typography variant='h6' className={classes.title}>
+          <Typography variant='h4' className={classes.title}>
             Sign Up
           </Typography>
           <TextField
@@ -84,6 +111,11 @@ export default function Signup() {
             onChange={handleChange('name')}
             margin='normal'
           />
+          {values.error.name && (
+            <Typography component='p' color='error'>
+              {values.error.name}
+            </Typography>
+          )}
           <br />
           <TextField
             id='email'
@@ -94,6 +126,11 @@ export default function Signup() {
             onChange={handleChange('email')}
             margin='normal'
           />
+          {values.error.email && (
+            <Typography component='p' color='error'>
+              {values.error.email}
+            </Typography>
+          )}
           <br />
           <TextField
             id='password'
@@ -104,15 +141,27 @@ export default function Signup() {
             onChange={handleChange('password')}
             margin='normal'
           />
-          <br />{' '}
-          {values.error && (
+          {values.error.password && (
             <Typography component='p' color='error'>
-              <Icon color='error' className={classes.error}>
-                error
-              </Icon>
-              {values.error}
+              {values.error.password}
             </Typography>
           )}
+          <br />
+          <TextField
+            id='passwordConfirm'
+            type='password'
+            label='Confirm Password'
+            className={classes.textField}
+            value={values.passwordConfirm}
+            onChange={handleChange('passwordConfirm')}
+            margin='normal'
+          />
+          {values.error.passwordConfirm && (
+            <Typography component='p' color='error'>
+              {values.error.passwordConfirm}
+            </Typography>
+          )}
+          <br />{' '}
         </CardContent>
         <CardActions>
           <Button
@@ -125,6 +174,7 @@ export default function Signup() {
           </Button>
         </CardActions>
       </Card>
+
       <Dialog open={values.open} disableBackdropClick={true}>
         <DialogTitle>New Account</DialogTitle>
         <DialogContent>
@@ -134,7 +184,13 @@ export default function Signup() {
         </DialogContent>
         <DialogActions>
           <Link to='/signin'>
-            <Button color='primary' autoFocus='autoFocus' variant='contained'>
+            <Button
+              color='primary'
+              autoFocus='autoFocus'
+              variant='contained'
+              onClick={home}
+              className={classes.signin}
+            >
               Sign In
             </Button>
           </Link>

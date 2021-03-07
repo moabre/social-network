@@ -14,6 +14,7 @@ const homeStyles = makeStyles({
   text: {
     fontWeight: 545,
     margin: '0 auto',
+    marginTop: '2rem',
   },
   container: {
     display: 'flex',

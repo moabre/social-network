@@ -9,7 +9,6 @@ const PostSchema = new Schema({
   },
   avatar: {
     type: String,
-    required: true,
   },
   comments: {
     type: [
@@ -21,9 +20,7 @@ const PostSchema = new Schema({
     ],
     required: true,
   },
-  likers: {
-    type: [{ type: mongoose.Schema.ObjectId, ref: 'User' }],
-  },
+  likers: [{ type: mongoose.Schema.ObjectId, ref: 'User' }],
   likesCount: {
     type: Number,
     required: true,

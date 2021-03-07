@@ -10,7 +10,7 @@ import {
 
 export const registerUser = (user) => (dispatch) => {
   axios
-    .post('/api/users', user)
+    .post('http://localhost:5000/api/users', user)
     .then((res) => {
       dispatch({
         type: INDICATE_NO_ERRORS,

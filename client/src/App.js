@@ -15,7 +15,7 @@ const App = () => {
         <Router history={history}>
           <Switch>
             <Route exact path='/' component={Home} />
-            <Route patch='/signup' component={Signup} />
+            <Route path='/signup' component={Signup} />
           </Switch>
         </Router>
       </ThemeProvider>

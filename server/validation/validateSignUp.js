@@ -44,7 +44,7 @@ const validatesSignUp = (data) => {
   }
 
   if (validator.isEmpty(data.passwordConfirm)) {
-    errors.passwordConfirm = 'Password is required';
+    errors.passwordConfirm = 'Confirming password is required';
   }
 
   return {

@@ -1,6 +1,5 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardMedia from '@material-ui/core/CardMedia';
 import CardContent from '@material-ui/core/CardContent';
@@ -8,7 +7,7 @@ import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import homeStyles from '../styles/homeStyles';
 import Signin from './SignIn';
-import Menu from './NavBar';
+import NavBar from './NavBar';
 
 const Home = () => {
   const state = useSelector((state) => state);
@@ -37,7 +36,7 @@ const Home = () => {
       )}
       {isAuthenticated && (
         <>
-          <Menu />
+          <NavBar />
           <Grid container spacing={8}>
             {/* <Grid item xs={8} sm={7}>
             <Newsfeed />

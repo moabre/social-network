@@ -25,7 +25,7 @@ const login = async (req, res) => {
       _id: user._id,
     },
     process.env.TOKEN_CODE,
-    { expiresIn: '1h' }
+    { expiresIn: '4h' }
   );
   res
     .header('Authorization', `Bearer ${token}`)
@@ -43,7 +43,7 @@ const requiresSignin = expressJwt({
 });
 
 const hasAuth = (req, res, next) => {
-  const authorized = req.profile && req.auth && req.profile_.id == req.auth._id;
+  const authorized = req.profile && req.auth && req.profile._id == req.auth._id;
   if (!authorized) {
     return res.status('403').json({
       error: 'User is not authorized',

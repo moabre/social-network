@@ -37,7 +37,7 @@ const postNewsFeed = async (req, res) => {
 //create a post
 const post = async (req, res) => {
   const newPost = new Post({
-    postedBy: req.body.postedBy,
+    postedBy: req.profile._id,
     avatar: req.body.avatar || '',
     comments: [],
     likers: [],
@@ -57,12 +57,13 @@ const post = async (req, res) => {
 const postById = async (req, res, next, id) => {
   try {
     const post = await Post.findById(id)
-      .populated('postedBy', '_id name')
+      .populate('postedBy', '_id name')
       .exec();
     if (!post) return res.status(400).json({ error: 'Post not found' });
     req.post = post;
     next();
   } catch (err) {
+    console.log(err);
     return res.status(400).json({
       error: 'Could not retrive post',
     });
@@ -108,7 +109,6 @@ const unlike = async (req, res) => {
 //Deleteing a comment
 const deleteComment = async (req, res) => {
   const comment = req.body.comment;
-
   try {
     const result = await Post.findByIdAndUpdate(
       req.body.postId,
@@ -137,10 +137,8 @@ const comment = async (req, res) => {
     const result = await Post.findByIdAndUpdate(
       req.body.postId,
       {
-        $set: {
-          comments: {
-            text: req.body.text,
-          },
+        $push: {
+          comments: comment,
         },
       },
       { new: true }
@@ -148,6 +146,7 @@ const comment = async (req, res) => {
       .populate('comments.postedBy', '_id name')
       .populate('postedBy', '_id name')
       .exec();
+    console.log(comment.postedBy);
     return res.status(200).json(result);
   } catch (err) {
     return res.status(400).send(err);
@@ -165,7 +164,8 @@ const deletePost = async (req, res) => {
 };
 //auth to check if it is current poster
 const authPoster = (req, res, next) => {
-  const isPoster = req.post && req.auth && req.postedBy._id == req.auth._id;
+  const isPoster =
+    req.post && req.auth && req.post.postedBy._id == req.auth._id;
   if (!isPoster) {
     return res.status(403).json({
       error: 'User is not authorized',
