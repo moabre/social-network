@@ -8,18 +8,16 @@ const PostSchema = new Schema({
     ref: 'User',
   },
   avatar: {
-    type: String,
+    type: mongoose.Schema.ObjectId,
+    ref: 'User',
   },
-  comments: {
-    type: [
-      {
-        postedBy: { type: mongoose.Schema.ObjectId, ref: 'User' },
-        text: String,
-        timestamp: { type: Date, default: Date.now },
-      },
-    ],
-    required: true,
-  },
+  comments: [
+    {
+      postedBy: { type: mongoose.Schema.ObjectId, ref: 'User' },
+      text: String,
+      timestamp: { type: Date, default: Date.now },
+    },
+  ],
   likers: [{ type: mongoose.Schema.ObjectId, ref: 'User' }],
   likesCount: {
     type: Number,

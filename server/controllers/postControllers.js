@@ -4,8 +4,9 @@ const Post = require('../models/postModel');
 const postsByUser = async (req, res) => {
   try {
     const posts = await Post.find({ postedBy: req.profile._id })
-      .populate('comments.postedBy', '_id name')
-      .populate('postedBy', '_id name')
+      .populate('comments.postedBy', '_id name avatar')
+      .populate('postedBy', '_id name avatar')
+      .populate('likers', '_id name')
       .sort({ timestamp: -1 })
       .exec();
     return res.status(200).json(posts);
@@ -22,8 +23,9 @@ const postNewsFeed = async (req, res) => {
   following.push(req.profile._id);
   try {
     const posts = await Post.find({ postedBy: { $in: req.profile.following } })
-      .populate('comments.postedBy', '_id name')
-      .populate('postedBy', '_id name')
+      .populate('comments.postedBy', '_id name avatar')
+      .populate('postedBy', '_id name avatar')
+      .populate('likers', '_id name')
       .sort({ timestamp: -1 })
       .exec();
     return res.status(200).json(posts);
@@ -38,7 +40,6 @@ const postNewsFeed = async (req, res) => {
 const post = async (req, res) => {
   const newPost = new Post({
     postedBy: req.profile._id,
-    avatar: req.body.avatar || '',
     comments: [],
     likers: [],
     likesCount: 0,
@@ -47,7 +48,11 @@ const post = async (req, res) => {
     timestamp: new Date().getTime(),
   });
   try {
-    const post = await newPost.save();
+    const post = await newPost
+      .save()
+      .then((newPost) =>
+        newPost.populate('postedBy', '_id name avatar').execPopulate()
+      );
     return res.status(201).json(post);
   } catch (err) {
     return res.status(400).send(err);
@@ -58,12 +63,12 @@ const postById = async (req, res, next, id) => {
   try {
     const post = await Post.findById(id)
       .populate('postedBy', '_id name')
+      .populate('likers', '_id name')
       .exec();
     if (!post) return res.status(400).json({ error: 'Post not found' });
     req.post = post;
     next();
   } catch (err) {
-    console.log(err);
     return res.status(400).json({
       error: 'Could not retrive post',
     });
@@ -123,6 +128,29 @@ const deleteComment = async (req, res) => {
     )
       .populate('comments.postedBy', '_id name')
       .populate('postedBy', '_id name')
+      .populate('likers', '_id name')
+      .exec();
+    return res.status(200).json(result);
+  } catch (err) {
+    return res.status(400).send(err);
+  }
+};
+// Edit Comment
+const editComment = async (req, res) => {
+  const comment = req.body.comment;
+  try {
+    const result = await Post.findOneAndUpdate(
+      { _id: req.body.postId, 'comments._id': comment._id },
+      {
+        $set: {
+          'comments.$.text': comment.text,
+        },
+      },
+      { new: true }
+    )
+      .populate('comments.postedBy', '_id name')
+      .populate('postedBy', '_id name')
+      .populate('likers', '_id name')
       .exec();
     return res.status(200).json(result);
   } catch (err) {
@@ -145,8 +173,8 @@ const comment = async (req, res) => {
     )
       .populate('comments.postedBy', '_id name')
       .populate('postedBy', '_id name')
+      .populate('likers', '_id name')
       .exec();
-    console.log(comment.postedBy);
     return res.status(200).json(result);
   } catch (err) {
     return res.status(400).send(err);
@@ -185,4 +213,5 @@ module.exports = {
   deletePost,
   postById,
   authPoster,
+  editComment,
 };

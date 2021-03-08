@@ -3,7 +3,8 @@ import {
   ADD_COMMENT,
   DELETE_COMMENT,
   EDIT_COMMENT,
-  GET_POSTS,
+  GET_POST_USER,
+  GET_POST_FEED,
   CREATE_POST,
   EDIT_POST,
   DELETE_POST,
@@ -41,21 +42,25 @@ export const editComment = (action, commentId, postId, text) => (dispatch) =>
     })
   );
 
-export const getPosts = () => (dispatch) =>
-  axios.get('/posts').then((res) =>
+export const getPostFeed = (user) => (dispatch) =>
+  axios.get(`/api/posts/feed/:${user.userId}`).then((res) =>
     dispatch({
-      type: GET_POSTS,
+      type: GET_POST_FEED,
+      payload: res.data,
+    })
+  );
+export const getPostUser = (user) => (dispatch) =>
+  axios.get(`/api/posts/by/:${user.userId}`).then((res) =>
+    dispatch({
+      type: GET_POST_USER,
       payload: res.data,
     })
   );
 
 export const createPost = (text, user) => (dispatch) =>
   axios
-    .post('/posts', {
+    .post(`/api/posts/new/:${user.userId}`, {
       text,
-      author: user.name,
-      authorId: user.userId,
-      avatarColor: user.avatarColor,
     })
     .then((res) =>
       dispatch({

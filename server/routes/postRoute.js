@@ -24,6 +24,9 @@ router
 router
   .route('/api/posts/uncomment')
   .put(authCtrl.requiresSignin, postCtrl.deleteComment);
+router
+  .route('/api/posts/edit/comment')
+  .put(authCtrl.requiresSignin, postCtrl.editComment);
 
 router
   .route('/api/posts/:postId')

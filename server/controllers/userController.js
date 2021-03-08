@@ -22,6 +22,7 @@ const create = async (req, res) => {
     createdAt: new Date().getTime(),
     email: req.body.email,
     name: req.body.name,
+    avatar: req.body.avatar || '',
     password: hashPassword,
     passwordConfirm: hashPassword,
     showEmail: true,
