@@ -7,14 +7,15 @@ import {
   CREATE_POST,
   EDIT_POST,
   DELETE_POST,
-  UPDATE_POST_LIKES,
+  POST_LIKE,
+  POST_UNLIKE,
 } from '../actions/actionTypes';
 
 const initialState = {
   posts: [],
 };
 
-export default (state = initialState, action) => {
+export default function postReducer(state = initialState, action) {
   switch (action.type) {
     case ADD_COMMENT:
       return {
@@ -22,18 +23,7 @@ export default (state = initialState, action) => {
         posts: state.posts.map((post) => {
           if (post._id === action.payload._id) {
             return {
-              ...post,
-              comments: [
-                ...post.comments,
-                {
-                  _id:
-                    action.payload.comments[action.payload.comments.length - 1]
-                      ._id,
-                  commenterId: action.commenterId,
-                  text: action.text,
-                  timestamp: action.timestamp,
-                },
-              ],
+              ...action.payload,
             };
           }
           return post;
@@ -45,8 +35,7 @@ export default (state = initialState, action) => {
         posts: state.posts.map((post) => {
           if (post._id === action.payload._id) {
             return {
-              ...post,
-              comments: action.payload.comments,
+              ...action.payload,
             };
           }
           return post;
@@ -58,8 +47,7 @@ export default (state = initialState, action) => {
         posts: state.posts.map((post) => {
           if (post._id === action.payload._id) {
             return {
-              ...post,
-              comments: action.payload.comments,
+              ...action.payload,
             };
           }
           return post;
@@ -78,47 +66,42 @@ export default (state = initialState, action) => {
     case CREATE_POST: {
       return {
         ...state,
-        posts: [
-          {
-            _id: action.payload._id,
-            author: action.payload.postedBy.name,
-            authorId: action.payload.postedBy._id,
-            avatar: action.payload.postedBy.avatar,
-            comments: [],
-            likers: action.payload.likers,
-            likesCount: action.payload.likesCount,
-            text: action.payload.text,
-            timestamp: action.payload.timestamp,
-            image: action.payload.image,
-          },
-          ...state.posts,
-        ],
+        posts: [...action.payload, ...state.posts],
       };
     }
     case EDIT_POST: {
       return {
         ...state,
         posts: state.posts.map((post) => {
-          if (post._id === action.id) {
+          if (post._id === action.payload._id) {
             return {
-              ...post,
-              text: action.text,
-              author: action.author,
+              ...action.payload,
             };
           }
           return post;
         }),
       };
     }
-    case UPDATE_POST_LIKES: {
+    case POST_LIKE: {
       return {
         ...state,
         posts: state.posts.map((post) => {
           if (post._id === action.payload._id) {
             return {
-              ...post,
-              likers: action.payload.likers,
-              likesCount: action.payload.likesCount,
+              ...action.payload,
+            };
+          }
+          return post;
+        }),
+      };
+    }
+    case POST_UNLIKE: {
+      return {
+        ...state,
+        posts: state.posts.map((post) => {
+          if (post._id === action.payload._id) {
+            return {
+              ...action.payload,
             };
           }
           return post;
@@ -128,10 +111,10 @@ export default (state = initialState, action) => {
     case DELETE_POST: {
       return {
         ...state,
-        posts: state.posts.filter(({ _id }) => _id !== action.id),
+        posts: state.posts.filter(({ _id }) => _id !== action.postId),
       };
     }
     default:
       return state;
   }
-};
+}

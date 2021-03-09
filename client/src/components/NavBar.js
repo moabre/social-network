@@ -49,7 +49,7 @@ const NavBar = withRouter(({ history }) => {
           Social-Network
         </Typography>
         <div className={classes.container}>
-          <Link onClick={home}>
+          <Link to='/'>
             <IconButton aria-label='Home' style={active(history, '/')}>
               <HomeIcon />
             </IconButton>

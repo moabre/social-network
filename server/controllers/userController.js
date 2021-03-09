@@ -98,6 +98,7 @@ const updateUser = async (req, res) => {
       email: req.body.email,
       name: req.body.name,
       showEmail: req.body.showEmail,
+      updated: new Date().getTime(),
     },
     { new: true, upsert: true, setDefaultsOnInsert: true },
     (err) => {
@@ -131,17 +132,17 @@ const addUserFollowing = async (req, res, next) => {
   if (!req.body.idToFollow)
     return res.status(404).json({ message: 'No ID found' });
   try {
-    await User.findByIdAndUpdate(
+    const user = await User.findByIdAndUpdate(
       req.body.userId,
       {
         $addToSet: { following: req.body.idToFollow },
       },
-      { new: true, upsert: true },
-      (err, doc) => {
-        if (err) return res.status(400).json(err);
-        return res.status(201).json(doc);
-      }
-    );
+      { new: true, upsert: true }
+    )
+      .populate('following', '_id name')
+      .populate('followers', '_id name')
+      .exec();
+    req.profile = user;
     next();
   } catch (err) {
     return res.status(500).json(err);
@@ -149,16 +150,17 @@ const addUserFollowing = async (req, res, next) => {
 };
 
 const addFollower = async (req, res) => {
+  const user = req.profile;
   try {
     const result = await User.findByIdAndUpdate(
-      req.body.followId,
+      req.body.idToFollow,
       { $addToSet: { followers: req.body.userId } },
       { new: true }
-        .populate('following', '_id name')
-        .populate('followers', '_id name')
-        .exec()
-    );
-    res.json(result);
+    )
+      .populate('following', '_id name')
+      .populate('followers', '_id name')
+      .exec();
+    return res.status(201).json(user);
   } catch (err) {
     return res.status(400).json({
       error: 'Could not add follower',
@@ -170,15 +172,15 @@ const removeUserFollowing = async (req, res, next) => {
   if (!req.body.idToUnfollow)
     return res.status(404).json({ message: 'No ID found' });
   try {
-    await User.findByIdAndUpdate(
+    const user = await User.findByIdAndUpdate(
       req.body.userId,
       { $pull: { following: req.body.idToUnfollow } },
-      { new: true, upsert: true },
-      (err, doc) => {
-        if (err) return res.status(400).json(err);
-        return res.status(201).json(doc);
-      }
-    );
+      { new: true, upsert: true }
+    )
+      .populate('following', '_id name')
+      .populate('followers', '_id name')
+      .exec();
+    req.profile = user;
     next();
   } catch (err) {
     return res.status(500).json(err);
@@ -187,22 +189,18 @@ const removeUserFollowing = async (req, res, next) => {
 
 //Remove a user from list of users following you
 const removeFollower = async (req, res) => {
-  if (!req.body.unfollowerId)
-    return res.status(404).json({ message: 'No ID found' });
+  const user = req.profile;
+  if (!req.body.userId) return res.status(404).json({ message: 'No ID found' });
   try {
     const result = await User.findByIdAndUpdate(
       req.body.idToUnfollow,
       { $pull: { followers: req.body.userId } },
       { new: true, upsert: true }
-        .populate('following', '_id name')
-        .populate('followers', '_id name')
-        .exec(),
-      (err, doc) => {
-        if (err) return res.status(400).json(err);
-        return res.status(201).json(doc);
-      }
-    );
-    res.json(result);
+    )
+      .populate('following', '_id name')
+      .populate('followers', '_id name')
+      .exec();
+    return res.status(201).json(user);
   } catch (err) {
     return res.status(500).json(err);
   }
@@ -212,7 +210,9 @@ const recommendPeople = async (req, res) => {
   const following = req.profile.following;
   following.push(req.profile._id);
   try {
-    let users = await User.find({ _id: { $nin: following } }).select('name');
+    let users = await User.find({ _id: { $nin: following } }).select(
+      'name avatar'
+    );
     res.json(users);
   } catch (err) {
     return res.status(400).json({

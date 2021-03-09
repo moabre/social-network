@@ -27,6 +27,9 @@ router
 router
   .route('/api/posts/edit/comment')
   .put(authCtrl.requiresSignin, postCtrl.editComment);
+router
+  .route('/api/posts/edit/:postId')
+  .put(authCtrl.requiresSignin, postCtrl.editPost);
 
 router
   .route('/api/posts/:postId')

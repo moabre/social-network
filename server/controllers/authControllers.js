@@ -24,6 +24,10 @@ const login = async (req, res) => {
     {
       _id: user._id,
       name: user.name,
+      avatar: user.avatar,
+      email: user.email,
+      showEmail: user.showEmail,
+      bio: user.bio,
     },
     process.env.TOKEN_CODE,
     { expiresIn: '4h' }

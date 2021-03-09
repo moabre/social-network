@@ -82,7 +82,11 @@ const like = async (req, res) => {
       req.body.postId,
       { $inc: { likesCount: 1 }, $addToSet: { likers: req.body.userId } },
       { new: true }
-    );
+    )
+      .populate('comments.postedBy', '_id name')
+      .populate('postedBy', '_id name')
+      .populate('likers', '_id name')
+      .exec();
     return res.status(200).json(result);
   } catch (err) {
     return res.status(400).json({
@@ -93,18 +97,18 @@ const like = async (req, res) => {
 //unlike a post
 const unlike = async (req, res) => {
   try {
-    const results = Post.findByIdAndUpdate(
+    const results = await Post.findByIdAndUpdate(
       req.body.postId,
       {
         $inc: { likesCount: -1 },
         $pull: { likers: req.body.userId },
       },
-      { new: true },
-      (err, post) => {
-        if (err) return res.status(400).send(err);
-        return res.send(post);
-      }
-    );
+      { new: true }
+    )
+      .populate('comments.postedBy', '_id name')
+      .populate('postedBy', '_id name')
+      .populate('likers', '_id name')
+      .exec();
     return res.status(200).json(results);
   } catch (err) {
     return res.status(400).send(err);
@@ -157,6 +161,29 @@ const editComment = async (req, res) => {
     return res.status(400).send(err);
   }
 };
+//edit post
+const editPost = async (req, res) => {
+  const postId = req.post._id;
+  try {
+    const result = await Post.findByIdAndUpdate(
+      postId,
+      {
+        $set: {
+          text: req.body.text,
+        },
+      },
+      { new: true }
+    )
+      .populate('comments.postedBy', '_id name')
+      .populate('postedBy', '_id name')
+      .populate('likers', '_id name')
+      .exec();
+    return res.status(200).json(result);
+  } catch (err) {
+    return res.status(400).send(err);
+  }
+};
+
 //posting a comment
 const comment = async (req, res) => {
   const comment = req.body.comment;
@@ -214,4 +241,5 @@ module.exports = {
   postById,
   authPoster,
   editComment,
+  editPost,
 };
