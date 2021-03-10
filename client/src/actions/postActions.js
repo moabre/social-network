@@ -13,7 +13,6 @@ import {
 } from './actionTypes';
 
 const productionLink = 'http://localhost:5000';
-const token = localStorage.getItem('jwtToken');
 
 export const addComment = (postId, userId, comment) => (dispatch) =>
   axios

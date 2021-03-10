@@ -5,6 +5,7 @@ import { ThemeProvider } from '@material-ui/styles';
 import theme from './theme';
 import Home from './components/Home';
 import Signup from './components/SignUp';
+import User from './components/user/User';
 
 export const history = createBrowserHistory();
 
@@ -16,6 +17,7 @@ const App = () => {
           <Switch>
             <Route exact path='/' component={Home} />
             <Route path='/signup' component={Signup} />
+            <Route path='/user/:userId' component={User} />
           </Switch>
         </Router>
       </ThemeProvider>

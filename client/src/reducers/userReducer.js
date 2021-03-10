@@ -31,13 +31,30 @@ export default function userReducer(state = initialState, action) {
     case GET_ALL_USERS:
       return {
         ...state,
-        allUsers: action.payload,
+        recommended: action.payload,
       };
     case UPDATE_FOLLOWING:
       return {
         ...state,
-        following: action.payload.following,
-        followers: action.paylod.followers,
+        recommended: state.recommended.filter(
+          (i) => i._id !== action.idToFollow
+        ),
+        following: action.payload.following.length
+          ? action.payload.following
+          : [],
+        followers: action.payload.followers.length
+          ? action.payload.followers
+          : [],
+      };
+    case UPDATE_FOLLOWERS:
+      return {
+        ...state,
+        following: action.payload.following.length
+          ? action.payload.following
+          : [],
+        followers: action.payload.followers.length
+          ? action.payload.followers
+          : [],
       };
     default:
       return state;

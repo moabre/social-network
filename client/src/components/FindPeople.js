@@ -11,11 +11,10 @@ import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import { Link } from 'react-router-dom';
-import { findPeople, follow } from './api-user.js';
 import Snackbar from '@material-ui/core/Snackbar';
 import ViewIcon from '@material-ui/icons/Visibility';
 import { useDispatch, useSelector } from 'react-redux';
-import { getRecommended, followUser } from '../../actions/postActions';
+import { getRecommended, followUser } from '../actions/userActions';
 
 const useStyles = makeStyles((theme) => ({
   root: theme.mixins.gutters({
@@ -50,40 +49,35 @@ export default function FindPeople() {
       user: { _id },
     },
   } = state;
+  const {
+    user: { recommended },
+  } = state;
+  const userId = _id;
   const [values, setValues] = useState({
     users: [],
     open: false,
     followMessage: '',
   });
-  const jwt = auth.isAuthenticated();
 
   useEffect(() => {
     dispatch(getRecommended(_id));
   }, []);
+  useEffect(() => {
+    setValues({
+      ...values,
+      users: recommended,
+    });
+  }, [recommended]);
+
   const clickFollow = (user, index) => {
-    follow(
-      {
-        userId: jwt.user._id,
-      },
-      {
-        t: jwt.token,
-      },
-      user._id
-    ).then((data) => {
-      if (data.error) {
-        console.log(data.error);
-      } else {
-        let toFollow = values.users;
-        toFollow.splice(index, 1);
-        setValues({
-          ...values,
-          users: toFollow,
-          open: true,
-          followMessage: `Following ${user.name}!`,
-        });
-      }
+    dispatch(followUser(user, index._id));
+    setValues({
+      ...values,
+      open: true,
+      followMessage: `Following ${index.name}!`,
     });
   };
+
   const handleRequestClose = (event, reason) => {
     setValues({ ...values, open: false });
   };
@@ -117,7 +111,7 @@ export default function FindPeople() {
                       variant='contained'
                       color='primary'
                       onClick={() => {
-                        clickFollow(item, i);
+                        clickFollow(userId, item);
                       }}
                     >
                       Follow

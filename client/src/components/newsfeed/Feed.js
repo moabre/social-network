@@ -36,23 +36,17 @@ export default function Newsfeed() {
   const {
     posts: { posts },
   } = state;
+  const {
+    user: { following },
+  } = state;
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(getPostFeed(_id));
   }, []);
-
-  // const addPost = (post) => {
-  //   const updatedPosts = [...posts];
-  //   updatedPosts.unshift(post);
-  //   setPosts(updatedPosts);
-  // };
-  // const removePost = (post) => {
-  //   const updatedPosts = [...posts];
-  //   const index = updatedPosts.indexOf(post);
-  //   updatedPosts.splice(index, 1);
-  //   setPosts(updatedPosts);
-  // };
+  useEffect(() => {
+    dispatch(getPostFeed(_id));
+  }, [following]);
 
   return (
     <Card className={classes.card}>

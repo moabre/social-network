@@ -9,7 +9,7 @@ import Button from '@material-ui/core/Button';
 import NavBarStyles from '../styles/NavBarStyles';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { logoutUser } from '../actions/authActions';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 
@@ -21,14 +21,16 @@ const active = (history, path) => {
   }
 };
 
-const home = () => {
-  window.location.href = '/';
-};
-
 const NavBar = withRouter(({ history }) => {
   const classes = NavBarStyles();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const dispatch = useDispatch();
+  const state = useSelector((state) => state);
+  const {
+    authReducer: {
+      user: { _id },
+    },
+  } = state;
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -70,8 +72,12 @@ const NavBar = withRouter(({ history }) => {
               open={Boolean(anchorEl)}
               onClose={handleClose}
             >
-              <MenuItem onClick={handleClose}>Profile</MenuItem>
-              <MenuItem onClick={handleClose}>My Account</MenuItem>
+              <Link
+                to={`/user/${_id}`}
+                style={{ color: 'black', textDecoration: 'none' }}
+              >
+                <MenuItem onClick={handleClose}>Profile</MenuItem>
+              </Link>
               <MenuItem onClick={signOut}>Logout</MenuItem>
             </Menu>
           </div>

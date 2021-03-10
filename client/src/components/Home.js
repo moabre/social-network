@@ -1,5 +1,4 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 import Card from '@material-ui/core/Card';
 import CardMedia from '@material-ui/core/CardMedia';
 import CardContent from '@material-ui/core/CardContent';
@@ -9,6 +8,8 @@ import homeStyles from '../styles/homeStyles';
 import Signin from './SignIn';
 import NavBar from './NavBar';
 import Newsfeed from './newsfeed/Feed';
+import FindPeople from './FindPeople';
+import { useSelector } from 'react-redux';
 
 const Home = () => {
   const state = useSelector((state) => state);
@@ -43,7 +44,7 @@ const Home = () => {
               <Newsfeed />
             </Grid>
             <Grid item xs={6} sm={5}>
-              {/* <FindPeople /> */}
+              <FindPeople />
             </Grid>
           </Grid>
         </>
