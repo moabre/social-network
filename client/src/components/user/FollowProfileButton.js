@@ -8,14 +8,26 @@ export default function FollowProfileButton({
   id,
   following,
   switchButton,
+  name,
 }) {
   const dispatch = useDispatch();
   const unFollow = () => {
     dispatch(unfollowUser(userId, id));
+    dispatch({
+      type: 'REDUCE_FOLLOWER',
+      id: userId,
+    });
     switchButton();
   };
   const follow = () => {
     dispatch(followUser(userId, id));
+    dispatch({
+      type: 'INCREASE_FOLLOWER',
+      user: {
+        _id: userId,
+        name: name,
+      },
+    });
     switchButton();
   };
 

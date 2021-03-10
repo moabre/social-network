@@ -13,8 +13,9 @@ import Edit from '@material-ui/icons/Edit';
 import Divider from '@material-ui/core/Divider';
 import DeleteUser from './DeleteUser';
 import FollowProfileButton from './../user/FollowProfileButton';
-// import ProfileTabs from './../user/ProfileTabs';
+import ProfileTabs from './ProfileTabs';
 import { getUser } from '../../actions/userActions';
+import { getPostUser } from '../../actions/postActions';
 import { useSelector, useDispatch } from 'react-redux';
 import { Redirect, Link, useParams } from 'react-router-dom';
 import NavBar from '../NavBar';
@@ -46,30 +47,41 @@ export default function User({ match }) {
 
   const {
     authReducer: {
-      user: { _id },
+      user: { _id, name },
     },
   } = state;
 
   const {
-    user: { currUser, followers, following },
+    user: { currUser },
+  } = state;
+
+  const { user } = state;
+
+  const {
+    posts: { posts },
   } = state;
 
   const loggedInUser = _id;
   const profileUser = userId;
   const [values, setValues] = useState({
-    user: { following: [], followers: [] },
+    userRn: { following: [], followers: [], bio: '' },
     following: false,
   });
-  const [posts, setPosts] = useState([]);
 
   useEffect(() => {
     dispatch(getUser(profileUser));
+    dispatch(getPostUser(profileUser));
   }, [profileUser]);
 
   useEffect(() => {
     if (JSON.stringify(currUser) !== JSON.stringify({})) {
       setValues({
         ...values,
+        userRn: {
+          following: currUser.following,
+          followers: currUser.followers,
+          bio: currUser.bio,
+        },
         following: checkFollowing(currUser, loggedInUser),
       });
     }
@@ -82,27 +94,11 @@ export default function User({ match }) {
 
   const switchButton = () => {
     setValues({
+      ...values,
       following: !values.following,
     });
   };
 
-  // const clickFollowButton = (callApi) => {
-  //   callApi(
-  //     {
-  //       userId: jwt.user._id,
-  //     },
-  //     {
-  //       t: jwt.token,
-  //     },
-  //     values.user._id
-  //   ).then((data) => {
-  //     if (data.error) {
-  //       setValues({ ...values, error: data.error });
-  //     } else {
-  //       setValues({ ...values, user: data, following: !values.following });
-  //     }
-  //   });
-  // };
   // const loadPosts = (user) => {
   //   listByUser(
   //     {
@@ -147,35 +143,32 @@ export default function User({ match }) {
             <ListItemText primary={currUser.name} secondary={currUser.email} />{' '}
             {_id === currUser._id ? (
               <ListItemSecondaryAction>
-                <Link to={'/user/edit/' + values.user._id}>
+                <Link to={'/user/edit/' + values.userRn._id}>
                   <IconButton aria-label='Edit' color='primary'>
                     <Edit />
                   </IconButton>
                 </Link>
-                <DeleteUser userId={values.user._id} />
+                <DeleteUser userId={values.userRn._id} />
               </ListItemSecondaryAction>
             ) : (
               <FollowProfileButton
                 following={values.following}
                 id={profileUser}
+                name={name}
                 userId={loggedInUser}
                 switchButton={switchButton}
               />
             )}
           </ListItem>
           <Divider />
-          {/* <ListItem>
+          <ListItem>
             <ListItemText
-              primary={values.user.bio}
+              primary={values.userRn.bio}
               secondary={'Joined: ' + new Date(currUser.created).toDateString()}
             />
-          </ListItem> */}
+          </ListItem>
         </List>
-        {/* <ProfileTabs
-        user={values.user}
-        posts={posts}
-        removePostUpdate={removePost}
-      /> */}
+        <ProfileTabs posts={posts} user={values.userRn} />
       </Paper>
     </>
   );

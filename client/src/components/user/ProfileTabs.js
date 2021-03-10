@@ -4,7 +4,7 @@ import Typography from '@material-ui/core/Typography';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import FollowGrid from './../user/FollowGrid';
-import PostList from './../post/PostList';
+import PostList from '../newsfeed/PostList';
 
 const TabContainer = (props) => {
   return (
@@ -38,7 +38,7 @@ export default function ProfileTabs(props) {
       </AppBar>
       {tab === 0 && (
         <TabContainer>
-          <PostList removeUpdate={props.removePostUpdate} posts={props.posts} />
+          <PostList posts={props.posts} />
         </TabContainer>
       )}
       {tab === 1 && (

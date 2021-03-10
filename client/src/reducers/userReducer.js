@@ -1,12 +1,11 @@
 import {
-  GET_FOLLOWERS,
-  GET_FOLLOWING,
   GET_USER,
   GET_ALL_USERS,
   UPDATE_FOLLOWERS,
   UPDATE_FOLLOWING,
   LOGIN_USER,
 } from '../actions/actionTypes';
+import { useSelector } from 'react-redux';
 
 const initialState = {
   recommended: [],
@@ -18,6 +17,24 @@ const initialState = {
 
 export default function userReducer(state = initialState, action) {
   switch (action.type) {
+    case 'REDUCE_FOLLOWER':
+      return {
+        ...state,
+        currUser: {
+          ...state.currUser,
+          followers: state.currUser.followers.filter(
+            (i) => i._id !== action.id
+          ),
+        },
+      };
+    case 'INCREASE_FOLLOWER':
+      return {
+        ...state,
+        currUser: {
+          ...state.currUser,
+          followers: state.currUser.followers.concat([action.user]),
+        },
+      };
     case LOGIN_USER:
       return {
         ...state,
