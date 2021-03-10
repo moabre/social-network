@@ -1,7 +1,6 @@
 import axios from 'axios';
 import jwtDecode from 'jwt-decode';
 import setAuthToken from '../setAuthToken';
-import { useDispatch } from 'react-redux';
 import {
   INDICATE_NO_ERRORS,
   GET_ERRORS,
@@ -38,10 +37,10 @@ export const loginUser = (user) => (dispatch) => {
       dispatch(setCurrentUser(decoded));
     })
     .catch((err) => {
-      //dispatch({
-      //   type: GET_ERRORS,
-      //   payload: err.response,
-      // });
+      dispatch({
+        type: GET_ERRORS,
+        payload: err.response,
+      });
     });
 };
 

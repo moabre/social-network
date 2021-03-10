@@ -5,6 +5,7 @@ import {
   GET_ALL_USERS,
   UPDATE_FOLLOWERS,
   UPDATE_FOLLOWING,
+  LOGIN_USER,
 } from '../actions/actionTypes';
 
 const initialState = {
@@ -12,43 +13,31 @@ const initialState = {
   followers: [],
   following: [],
   currUser: {},
+  loginedInUser: {},
 };
 
 export default function userReducer(state = initialState, action) {
   switch (action.type) {
-    case GET_FOLLOWERS:
+    case LOGIN_USER:
       return {
         ...state,
-        followers: action.payload.user.followers,
-      };
-    case GET_FOLLOWING:
-      return {
-        ...state,
-        following: action.payload.user.following,
+        loginedInUser: action.payload.user,
       };
     case GET_USER:
       return {
         ...state,
-        currUser: action.payload,
+        currUser: action.payload.user,
       };
     case GET_ALL_USERS:
       return {
         ...state,
         allUsers: action.payload,
       };
-    case UPDATE_FOLLOWERS:
-      return {
-        ...state,
-        allUsers: state.allUsers.map((user) =>
-          user._id === action.payload._id
-            ? { ...user, followers: action.payload.followers }
-            : user
-        ),
-      };
     case UPDATE_FOLLOWING:
       return {
         ...state,
         following: action.payload.following,
+        followers: action.paylod.followers,
       };
     default:
       return state;

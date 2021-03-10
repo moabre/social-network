@@ -62,7 +62,7 @@ const post = async (req, res) => {
 const postById = async (req, res, next, id) => {
   try {
     const post = await Post.findById(id)
-      .populate('postedBy', '_id name')
+      .populate('postedBy', '_id name avatar')
       .populate('likers', '_id name')
       .exec();
     if (!post) return res.status(400).json({ error: 'Post not found' });
@@ -83,7 +83,7 @@ const like = async (req, res) => {
       { $inc: { likesCount: 1 }, $addToSet: { likers: req.body.userId } },
       { new: true }
     )
-      .populate('comments.postedBy', '_id name')
+      .populate('comments.postedBy', '_id name avatar')
       .populate('postedBy', '_id name')
       .populate('likers', '_id name')
       .exec();
@@ -105,7 +105,7 @@ const unlike = async (req, res) => {
       },
       { new: true }
     )
-      .populate('comments.postedBy', '_id name')
+      .populate('comments.postedBy', '_id name avatar')
       .populate('postedBy', '_id name')
       .populate('likers', '_id name')
       .exec();
@@ -130,7 +130,7 @@ const deleteComment = async (req, res) => {
       },
       { new: true }
     )
-      .populate('comments.postedBy', '_id name')
+      .populate('comments.postedBy', '_id name avatar')
       .populate('postedBy', '_id name')
       .populate('likers', '_id name')
       .exec();
@@ -152,7 +152,7 @@ const editComment = async (req, res) => {
       },
       { new: true }
     )
-      .populate('comments.postedBy', '_id name')
+      .populate('comments.postedBy', '_id name avatar')
       .populate('postedBy', '_id name')
       .populate('likers', '_id name')
       .exec();
@@ -174,7 +174,7 @@ const editPost = async (req, res) => {
       },
       { new: true }
     )
-      .populate('comments.postedBy', '_id name')
+      .populate('comments.postedBy', '_id name avatar')
       .populate('postedBy', '_id name')
       .populate('likers', '_id name')
       .exec();
@@ -198,7 +198,7 @@ const comment = async (req, res) => {
       },
       { new: true }
     )
-      .populate('comments.postedBy', '_id name')
+      .populate('comments.postedBy', '_id name avatar')
       .populate('postedBy', '_id name')
       .populate('likers', '_id name')
       .exec();

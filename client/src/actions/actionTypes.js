@@ -20,7 +20,7 @@ export const POST_UNLIKE = 'POST_UNLIKE';
 export const POST_LIKE = 'POST_LIKE';
 
 //userActions
-export const GET_FOLLOWERS = 'GET_FOLLOWERS';
+export const LOGIN_USER = 'LOGIN_USER';
 export const GET_FOLLOWING = 'GET_FOLLOWING';
 export const GET_ALL_USERS = 'GET_ALL_USERS';
 export const GET_USER = 'GET_USER';

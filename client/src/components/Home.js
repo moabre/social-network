@@ -8,6 +8,7 @@ import Grid from '@material-ui/core/Grid';
 import homeStyles from '../styles/homeStyles';
 import Signin from './SignIn';
 import NavBar from './NavBar';
+import Newsfeed from './newsfeed/Feed';
 
 const Home = () => {
   const state = useSelector((state) => state);
@@ -38,12 +39,12 @@ const Home = () => {
         <>
           <NavBar />
           <Grid container spacing={8}>
-            {/* <Grid item xs={8} sm={7}>
-            <Newsfeed />
-          </Grid>
-          <Grid item xs={6} sm={5}>
-            <FindPeople />
-          </Grid> */}
+            <Grid item xs={8} sm={7}>
+              <Newsfeed />
+            </Grid>
+            <Grid item xs={6} sm={5}>
+              {/* <FindPeople /> */}
+            </Grid>
           </Grid>
         </>
       )}
