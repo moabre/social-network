@@ -61,7 +61,7 @@ export default function FindPeople() {
 
   useEffect(() => {
     dispatch(getRecommended(_id));
-  }, []);
+  }, [dispatch, _id]);
   useEffect(() => {
     setValues({
       ...values,

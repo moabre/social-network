@@ -43,10 +43,10 @@ export default function Newsfeed() {
 
   useEffect(() => {
     dispatch(getPostFeed(_id));
-  }, []);
+  }, [dispatch]);
   useEffect(() => {
     dispatch(getPostFeed(_id));
-  }, [following]);
+  }, [following, dispatch]);
 
   return (
     <Card className={classes.card}>

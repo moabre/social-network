@@ -7,40 +7,26 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import { Redirect, Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { deleteUser } from '../../actions/userActions';
 
-export default function DeleteUser(props) {
+export default function DeleteUser({ userId }) {
   const [open, setOpen] = useState(false);
-  const [redirect, setRedirect] = useState(false);
+  const dispatch = useDispatch();
 
-  // const clickButton = () => {
-  //   setOpen(true);
-  // };
-  // const deleteAccount = () => {
-  //   remove(
-  //     {
-  //       userId: props.userId,
-  //     },
-  //     { t: jwt.token }
-  //   ).then((data) => {
-  //     if (data && data.error) {
-  //       console.log(data.error);
-  //     } else {
-  //       auth.clearJWT(() => console.log('deleted'));
-  //       setRedirect(true);
-  //     }
-  //   });
-  // };
+  const clickButton = () => {
+    setOpen(true);
+  };
+  const deleteAccount = () => {
+    dispatch(deleteUser(userId));
+  };
   const handleRequestClose = () => {
     setOpen(false);
   };
 
-  // if (redirect) {
-  //   return <Redirect to='/' />;
-  // }
   return (
     <span>
-      <IconButton aria-label='Delete' color='secondary'>
+      <IconButton aria-label='Delete' color='secondary' onClick={clickButton}>
         <DeleteIcon />
       </IconButton>
 
@@ -53,7 +39,11 @@ export default function DeleteUser(props) {
           <Button onClick={handleRequestClose} color='primary'>
             Cancel
           </Button>
-          <Button color='secondary' autoFocus='autoFocus'>
+          <Button
+            color='secondary'
+            autoFocus='autoFocus'
+            onClick={deleteAccount}
+          >
             Confirm
           </Button>
         </DialogActions>

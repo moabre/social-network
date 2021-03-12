@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
@@ -7,12 +7,14 @@ import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import Icon from '@material-ui/core/Icon';
 import SignInStyles from '../styles/SignInStyles';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { loginUser } from '../actions/authActions';
 
 export default function Signin(props) {
   const classes = SignInStyles();
   const dispatch = useDispatch();
+  const state = useSelector((state) => state);
+  const { error } = state;
   const [values, setValues] = useState({
     email: '',
     password: '',
@@ -37,6 +39,11 @@ export default function Signin(props) {
     setValues({ ...values, [name]: event.target.value });
   };
 
+  useEffect(() => {
+    if (JSON.stringify(error) !== '{}') {
+      setValues({ ...values, error: error });
+    }
+  }, [error]);
   return (
     <Card className={classes.card}>
       <CardContent>
@@ -62,10 +69,7 @@ export default function Signin(props) {
         <br />{' '}
         {values.error && (
           <Typography component='p' color='error'>
-            <Icon color='error' className={classes.error}>
-              error
-            </Icon>
-            {values.error}
+            {values.error.data}
           </Typography>
         )}
       </CardContent>

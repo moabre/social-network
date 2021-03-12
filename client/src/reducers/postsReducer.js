@@ -54,6 +54,12 @@ export default function postReducer(state = initialState, action) {
         }),
       };
     case GET_POST_USER:
+      if (!action.payload) {
+        return {
+          ...initialState,
+          posts: [],
+        };
+      }
       return {
         ...initialState,
         posts: action.payload,

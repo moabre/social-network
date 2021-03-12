@@ -8,7 +8,6 @@ export default function errorReducer(state = initialState, action) {
       return action.payload;
     case GET_ERRORS:
       return action.payload;
-
     default:
       return state;
   }

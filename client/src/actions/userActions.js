@@ -5,23 +5,32 @@ import {
   GET_ALL_USERS,
   UPDATE_FOLLOWERS,
   UPDATE_FOLLOWING,
+  GET_ERRORS,
 } from './actionTypes';
+import setAuthToken from '../setAuthToken';
+import { setCurrentUser } from './authActions';
 
 const productionLink = 'http://localhost:5000';
-export const followUser = (userId, idToFollow) => (dispatch) =>
+export const followUser = (userId, idToFollow) => (dispatch) => {
   axios
     .put(`${productionLink}/api/users/follow`, {
       idToFollow,
       userId,
     })
     .then((res) => {
-      console.log(res);
       dispatch({
         type: UPDATE_FOLLOWING,
         payload: res.data,
         idToFollow,
       });
+    })
+    .catch((err) => {
+      dispatch({
+        type: GET_ERRORS,
+        payload: err.response,
+      });
     });
+};
 
 export const unfollowUser = (userId, idToUnfollow) => (dispatch) =>
   axios
@@ -36,13 +45,23 @@ export const unfollowUser = (userId, idToUnfollow) => (dispatch) =>
       });
     });
 
-export const getUser = (userId) => (dispatch) =>
-  axios.get(`${productionLink}/api/users/${userId}`).then((res) => {
-    dispatch({
-      type: GET_USER,
-      payload: res.data,
+export const getUser = (userId) => (dispatch) => {
+  axios
+    .get(`${productionLink}/api/users/${userId}`)
+    .then((res) => {
+      dispatch({
+        type: GET_USER,
+        payload: res.data,
+      });
+    })
+    .catch((err) => {
+      dispatch({
+        type: GET_ERRORS,
+        payload: err.response,
+      });
     });
-  });
+};
+
 export const getLoginUser = (userId) => (dispatch) =>
   axios.get(`${productionLink}/api/users/${userId}`).then((res) => {
     dispatch({
@@ -58,3 +77,20 @@ export const getRecommended = (userId) => (dispatch) =>
       payload: res.data,
     });
   });
+
+export const deleteUser = (userId) => (dispatch) => {
+  axios
+    .delete(`${productionLink}/api/users/${userId}`)
+    .then((res) => {
+      localStorage.removeItem('jwtToken');
+      setAuthToken(false);
+      dispatch(setCurrentUser({}));
+      window.location.href = '/';
+    })
+    .catch((err) => {
+      dispatch({
+        type: GET_ERRORS,
+        payload: err.response,
+      });
+    });
+};

@@ -9,9 +9,10 @@ import Icon from '@material-ui/core/Icon';
 import Avatar from '@material-ui/core/Avatar';
 import FileUpload from '@material-ui/icons/AddPhotoAlternate';
 import { makeStyles } from '@material-ui/core/styles';
-import auth from './../auth/auth-helper';
-import { read, update } from './api-user.js';
-import { Redirect } from 'react-router-dom';
+import { Redirect, Link, useParams } from 'react-router-dom';
+import { getUser } from '../../actions/userActions';
+import { useSelector, useDispatch } from 'react-redux';
+import NavBar from '../NavBar';
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -23,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
   },
   title: {
     margin: theme.spacing(2),
-    color: theme.palette.protectedTitle,
+    color: 'black',
   },
   error: {
     verticalAlign: 'middle',
@@ -52,6 +53,20 @@ const useStyles = makeStyles((theme) => ({
 
 export default function EditProfile({ match }) {
   const classes = useStyles();
+  const dispatch = useDispatch();
+  const { userId } = useParams();
+  const profileUser = userId;
+  const state = useSelector((state) => state);
+  const {
+    user: { currUser },
+  } = state;
+
+  const {
+    authReducer: {
+      user: { _id, name, avatar },
+    },
+  } = state;
+  const loggedInUser = _id;
   const [values, setValues] = useState({
     name: '',
     about: '',
@@ -62,154 +77,152 @@ export default function EditProfile({ match }) {
     error: '',
     id: '',
   });
-  const jwt = auth.isAuthenticated();
 
   useEffect(() => {
-    const abortController = new AbortController();
-    const signal = abortController.signal;
+    dispatch(getUser(profileUser));
+  }, [profileUser]);
 
-    read(
-      {
-        userId: match.params.userId,
-      },
-      { t: jwt.token },
-      signal
-    ).then((data) => {
-      if (data & data.error) {
-        setValues({ ...values, error: data.error });
-      } else {
-        setValues({
-          ...values,
-          id: data._id,
-          name: data.name,
-          email: data.email,
-          about: data.about,
-        });
-      }
-    });
-    return function cleanup() {
-      abortController.abort();
-    };
-  }, [match.params.userId]);
+  useEffect(() => {
+    if (JSON.stringify(currUser) !== JSON.stringify({})) {
+      setValues({
+        ...values,
+        id: currUser._id,
+        name: currUser.name,
+        email: currUser.email,
+        about: currUser.bio,
+      });
+    }
+  }, [currUser]);
 
   const clickSubmit = () => {
-    let userData = new FormData();
-    values.name && userData.append('name', values.name);
-    values.email && userData.append('email', values.email);
-    values.passoword && userData.append('passoword', values.passoword);
-    values.about && userData.append('about', values.about);
-    values.photo && userData.append('photo', values.photo);
-    update(
-      {
-        userId: match.params.userId,
-      },
-      {
-        t: jwt.token,
-      },
-      userData
-    ).then((data) => {
-      if (data && data.error) {
-        setValues({ ...values, error: data.error });
-      } else {
-        setValues({ ...values, redirectToProfile: true });
-      }
-    });
+    // let userData = new FormData();
+    // values.name && userData.append('name', values.name);
+    // values.email && userData.append('email', values.email);
+    // values.passoword && userData.append('passoword', values.passoword);
+    // values.about && userData.append('about', values.about);
+    // values.photo && userData.append('photo', values.photo);
+    // update(
+    //   {
+    //     userId: match.params.userId,
+    //   },
+    //   {
+    //     t: jwt.token,
+    //   },
+    //   userData
+    // ).then((data) => {
+    //   if (data && data.error) {
+    //     setValues({ ...values, error: data.error });
+    //   } else {
+    //     setValues({ ...values, redirectToProfile: true });
+    //   }
+    // });
   };
   const handleChange = (name) => (event) => {
     const value = name === 'photo' ? event.target.files[0] : event.target.value;
     //userData.set(name, value)
     setValues({ ...values, [name]: value });
   };
-  const photoUrl = values.id
-    ? `/api/users/photo/${values.id}?${new Date().getTime()}`
-    : '/api/users/defaultphoto';
-  if (values.redirectToProfile) {
-    return <Redirect to={'/user/' + values.id} />;
+  if (loggedInUser !== profileUser) {
+    return (
+      <>
+        <NavBar />
+        <Card className={classes.card}>
+          <CardContent>
+            <Typography variant='h6' className={classes.title}>
+              You can't edit this profile!
+            </Typography>
+          </CardContent>
+        </Card>
+      </>
+    );
   }
   return (
-    <Card className={classes.card}>
-      <CardContent>
-        <Typography variant='h6' className={classes.title}>
-          Edit Profile
-        </Typography>
-        <Avatar src={photoUrl} className={classes.bigAvatar} />
-        <br />
-        <input
-          accept='image/*'
-          onChange={handleChange('photo')}
-          className={classes.input}
-          id='icon-button-file'
-          type='file'
-        />
-        <label htmlFor='icon-button-file'>
-          <Button variant='contained' color='default' component='span'>
-            Upload
-            <FileUpload />
-          </Button>
-        </label>{' '}
-        <span className={classes.filename}>
-          {values.photo ? values.photo.name : ''}
-        </span>
-        <br />
-        <TextField
-          id='name'
-          label='Name'
-          className={classes.textField}
-          value={values.name}
-          onChange={handleChange('name')}
-          margin='normal'
-        />
-        <br />
-        <TextField
-          id='multiline-flexible'
-          label='About'
-          multiline
-          rows='2'
-          value={values.about}
-          onChange={handleChange('about')}
-          className={classes.textField}
-          margin='normal'
-        />
-        <br />
-        <TextField
-          id='email'
-          type='email'
-          label='Email'
-          className={classes.textField}
-          value={values.email}
-          onChange={handleChange('email')}
-          margin='normal'
-        />
-        <br />
-        <TextField
-          id='password'
-          type='password'
-          label='Password'
-          className={classes.textField}
-          value={values.password}
-          onChange={handleChange('password')}
-          margin='normal'
-        />
-        <br />{' '}
-        {values.error && (
-          <Typography component='p' color='error'>
-            <Icon color='error' className={classes.error}>
-              error
-            </Icon>
-            {values.error}
+    <>
+      <NavBar />
+      <Card className={classes.card}>
+        <CardContent>
+          <Typography variant='h6' className={classes.title}>
+            Edit Profile
           </Typography>
-        )}
-      </CardContent>
-      <CardActions>
-        <Button
-          color='primary'
-          variant='contained'
-          onClick={clickSubmit}
-          className={classes.submit}
-        >
-          Submit
-        </Button>
-      </CardActions>
-    </Card>
+          <Avatar src={''} className={classes.bigAvatar} />
+          <br />
+          <input
+            accept='image/*'
+            onChange={handleChange('photo')}
+            className={classes.input}
+            id='icon-button-file'
+            type='file'
+          />
+          <label htmlFor='icon-button-file'>
+            <Button variant='contained' color='default' component='span'>
+              Upload
+              <FileUpload />
+            </Button>
+          </label>{' '}
+          <span className={classes.filename}>
+            {values.photo ? values.photo.name : ''}
+          </span>
+          <br />
+          <TextField
+            id='name'
+            label='Name'
+            className={classes.textField}
+            value={values.name}
+            onChange={handleChange('name')}
+            margin='normal'
+          />
+          <br />
+          <TextField
+            id='multiline-flexible'
+            label='About'
+            multiline
+            rows='2'
+            value={values.about}
+            onChange={handleChange('about')}
+            className={classes.textField}
+            margin='normal'
+          />
+          <br />
+          <TextField
+            id='email'
+            type='email'
+            label='Email'
+            className={classes.textField}
+            value={values.email}
+            onChange={handleChange('email')}
+            margin='normal'
+          />
+          <br />
+          <TextField
+            id='password'
+            type='password'
+            label='Password'
+            className={classes.textField}
+            value={values.password}
+            onChange={handleChange('password')}
+            margin='normal'
+          />
+          <br />{' '}
+          {values.error && (
+            <Typography component='p' color='error'>
+              <Icon color='error' className={classes.error}>
+                error
+              </Icon>
+              {values.error}
+            </Typography>
+          )}
+        </CardContent>
+        <CardActions>
+          <Button
+            color='primary'
+            variant='contained'
+            onClick={clickSubmit}
+            className={classes.submit}
+          >
+            Submit
+          </Button>
+        </CardActions>
+      </Card>
+    </>
   );
 }

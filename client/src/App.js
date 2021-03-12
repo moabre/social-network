@@ -6,6 +6,7 @@ import theme from './theme';
 import Home from './components/Home';
 import Signup from './components/SignUp';
 import User from './components/user/User';
+import EditProfile from './components/user/EditProfile';
 
 export const history = createBrowserHistory();
 
@@ -17,6 +18,7 @@ const App = () => {
           <Switch>
             <Route exact path='/' component={Home} />
             <Route path='/signup' component={Signup} />
+            <Route path='/user/edit/:userId' component={EditProfile} />
             <Route path='/user/:userId' component={User} />
           </Switch>
         </Router>

@@ -1,6 +1,7 @@
 import axios from 'axios';
 import jwtDecode from 'jwt-decode';
 import setAuthToken from '../setAuthToken';
+import store from '../store';
 import {
   INDICATE_NO_ERRORS,
   GET_ERRORS,
@@ -72,5 +73,20 @@ export const logoutUser = () => (dispatch) => {
   localStorage.removeItem('jwtToken');
   setAuthToken(false);
   dispatch(setCurrentUser({}));
-  window.location.href = '/auth/signin';
+  window.location.href = '/';
 };
+
+axios.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (err) => {
+    if (
+      err.response.status === 401 ||
+      err.response.data.message === '401 Unauthorized'
+    ) {
+      store.dispatch(logoutUser());
+    }
+    return Promise.reject(err);
+  }
+);

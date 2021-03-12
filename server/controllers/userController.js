@@ -1,4 +1,5 @@
 const User = require('../models/userModel');
+const Post = require('../models/postModel');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const validatesSignUp = require('../validation/validateSignUp');
@@ -23,6 +24,7 @@ const create = async (req, res) => {
     email: req.body.email,
     name: req.body.name,
     avatar: req.body.avatar || '',
+    bio: req.body.bio || '',
     password: hashPassword,
     passwordConfirm: hashPassword,
     showEmail: true,
@@ -46,7 +48,7 @@ const userById = async (req, res, next, id) => {
   try {
     const user = await User.findById(id)
       .populate('following', '_id name')
-      .populate('follwers', '_id name')
+      .populate('followers', '_id name')
       .exec();
     if (!user) return res.status(400).json({ error: 'User not found' });
     req.profile = user;
@@ -78,9 +80,22 @@ const specificUser = async (req, res) => {
 
 //delete a user
 const removeUser = async (req, res) => {
-  const { id } = req.params;
+  const { _id } = req.profile;
+  console.log(_id);
   try {
-    const user = await User.deleteOne({ _id: id });
+    const comments = await Post.updateMany(
+      { 'comments.postedBy': _id },
+      {
+        $pull: {
+          comments: {
+            postedBy: _id,
+          },
+        },
+        $inc: { likesCount: -1 },
+      }
+    );
+    const posts = await Post.deleteMany({ postedBy: _id });
+    const user = await User.deleteOne({ _id });
     res.status(200).json({ message: 'Successfuly deleted user' });
   } catch (err) {
     res.status(500).json({ message: err });

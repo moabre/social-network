@@ -10,6 +10,7 @@ import {
   DELETE_POST,
   POST_LIKE,
   POST_UNLIKE,
+  GET_ERRORS,
 } from './actionTypes';
 
 const productionLink = 'http://localhost:5000';
@@ -51,13 +52,22 @@ export const getPostFeed = (userId) => (dispatch) =>
       payload: res.data,
     });
   });
-export const getPostUser = (userId) => (dispatch) =>
-  axios.get(`${productionLink}/api/posts/by/${userId}`).then((res) =>
-    dispatch({
-      type: GET_POST_USER,
-      payload: res.data,
-    })
-  );
+export const getPostUser = (userId) => (dispatch) => {
+  axios
+    .get(`${productionLink}/api/posts/by/${userId}`)
+    .then((res) =>
+      dispatch({
+        type: GET_POST_USER,
+        payload: res.data,
+      })
+    )
+    .catch((err) => {
+      dispatch({
+        type: GET_ERRORS,
+        payload: err.response,
+      });
+    });
+};
 
 export const createPost = (text, userId) => (dispatch) =>
   axios

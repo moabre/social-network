@@ -131,6 +131,11 @@ export default function Signup() {
               {values.error.email}
             </Typography>
           )}
+          {values.error.error && (
+            <Typography component='p' color='error'>
+              {values.error.error}
+            </Typography>
+          )}
           <br />
           <TextField
             id='password'

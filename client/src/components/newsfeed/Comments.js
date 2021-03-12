@@ -71,23 +71,37 @@ export default function Comments({ postId, comments }) {
     dispatch(deleteComment(comment, postId));
   };
 
+  console.log(comments);
+
   const commentBody = (item) => {
     return (
       <p className={classes.commentText}>
-        <Link to={'/user/' + item.postedBy._id}>{item.postedBy.name}</Link>
-        <br />
-        {item.text}
-        <span className={classes.commentDate}>
-          {new Date(item.timestamp).toDateString()} |
-          {_id === item.postedBy._id && (
-            <Icon
-              onClick={() => deletesComment(item._id)}
-              className={classes.commentDelete}
-            >
-              <DeleteIcon style={{ fontSize: 16 }} />
-            </Icon>
-          )}
-        </span>
+        {item.postedBy ? (
+          <>
+            <Link to={'/user/' + item.postedBy._id}>{item.postedBy.name}</Link>
+            <br />
+            {item.text}
+            <span className={classes.commentDate}>
+              {new Date(item.timestamp).toDateString()} |
+              {_id === item.postedBy._id && (
+                <Icon
+                  onClick={() => deletesComment(item._id)}
+                  className={classes.commentDelete}
+                >
+                  <DeleteIcon style={{ fontSize: 16 }} />
+                </Icon>
+              )}
+            </span>
+          </>
+        ) : (
+          <>
+            <p>Deleted User</p>
+            {item.text}
+            <span className={classes.commentDate}>
+              {new Date(item.timestamp).toDateString()} |
+            </span>
+          </>
+        )}
       </p>
     );
   };

@@ -47,7 +47,7 @@ export default function User({ match }) {
 
   const {
     authReducer: {
-      user: { _id, name },
+      user: { _id, name, avatar },
     },
   } = state;
 
@@ -64,7 +64,7 @@ export default function User({ match }) {
   const loggedInUser = _id;
   const profileUser = userId;
   const [values, setValues] = useState({
-    userRn: { following: [], followers: [], bio: '' },
+    userRn: { following: [], followers: [], bio: '', _id: '' },
     following: false,
   });
 
@@ -81,6 +81,7 @@ export default function User({ match }) {
           following: currUser.following,
           followers: currUser.followers,
           bio: currUser.bio,
+          _id: currUser._id,
         },
         following: checkFollowing(currUser, loggedInUser),
       });
@@ -143,7 +144,7 @@ export default function User({ match }) {
             <ListItemText primary={currUser.name} secondary={currUser.email} />{' '}
             {_id === currUser._id ? (
               <ListItemSecondaryAction>
-                <Link to={'/user/edit/' + values.userRn._id}>
+                <Link to={`/user/edit/${values.userRn._id}`}>
                   <IconButton aria-label='Edit' color='primary'>
                     <Edit />
                   </IconButton>
@@ -156,6 +157,7 @@ export default function User({ match }) {
                 id={profileUser}
                 name={name}
                 userId={loggedInUser}
+                avatar={avatar}
                 switchButton={switchButton}
               />
             )}

@@ -18,6 +18,7 @@ if (localStorage.jwtToken) {
     window.location.href = '/';
   }
 }
+
 ReactDOM.render(
   <Provider store={store}>
     <App />
