@@ -81,7 +81,6 @@ const specificUser = async (req, res) => {
 //delete a user
 const removeUser = async (req, res) => {
   const { _id } = req.profile;
-  console.log(_id);
   try {
     const comments = await Post.updateMany(
       { 'comments.postedBy': _id },
@@ -104,17 +103,35 @@ const removeUser = async (req, res) => {
 
 //Update a users info
 const updateUser = async (req, res) => {
-  const { id } = req.params;
+  const userProfile = req.profile;
+  console.log(req.body.updates);
+  const updatedInfo = () => {
+    if (req.body.updates.email === userProfile.email) {
+      let object = {
+        avatar: req.body.updates.avatar,
+        bio: req.body.updates.bio,
+        name: req.body.updates.name,
+        showEmail: req.body.updates.showEmail,
+        updated: new Date().getTime(),
+      };
+      return object;
+    } else {
+      let object = {
+        avatar: req.body.updates.avatar,
+        bio: req.body.updates.bio,
+        email: req.body.updates.email,
+        name: req.body.updates.name,
+        showEmail: req.body.updates.showEmail,
+        updated: new Date().getTime(),
+      };
+      return object;
+    }
+  };
+  const update = updatedInfo();
+  const { userId } = req.params;
   const user = await User.findOneAndUpdate(
-    { _id: id },
-    {
-      avatar: req.body.avatar,
-      bio: req.body.bio,
-      email: req.body.email,
-      name: req.body.name,
-      showEmail: req.body.showEmail,
-      updated: new Date().getTime(),
-    },
+    { _id: userId },
+    update,
     { new: true, upsert: true, setDefaultsOnInsert: true },
     (err) => {
       if (err != null && err.name === 'MongoError' && err.code === 11000) {
@@ -139,7 +156,13 @@ const updateUser = async (req, res) => {
     process.env.TOKEN_CODE,
     { expiresIn: '24h' }
   );
-  return res.header('authorization', token).status(200).json({ user });
+  return res
+    .header('Authorization', `Bearer ${token}`)
+    .status(200)
+    .json({
+      message: 'Edit Successful',
+      token: `Bearer ${token}`,
+    });
 };
 
 //Add user to list of users you follow

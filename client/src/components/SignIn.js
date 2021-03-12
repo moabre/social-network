@@ -9,6 +9,7 @@ import Icon from '@material-ui/core/Icon';
 import SignInStyles from '../styles/SignInStyles';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser } from '../actions/authActions';
+import { history } from '../App';
 
 export default function Signin(props) {
   const classes = SignInStyles();
@@ -18,7 +19,9 @@ export default function Signin(props) {
   const [values, setValues] = useState({
     email: '',
     password: '',
-    error: '',
+    error: {
+      data: '',
+    },
     redirectToReferrer: false,
   });
 
@@ -32,7 +35,7 @@ export default function Signin(props) {
   };
 
   const redirectSignIn = () => {
-    window.location.href = '/signup';
+    history.push('/signup');
   };
 
   const handleChange = (name) => (event) => {
@@ -44,6 +47,7 @@ export default function Signin(props) {
       setValues({ ...values, error: error });
     }
   }, [error]);
+
   return (
     <Card className={classes.card}>
       <CardContent>
@@ -57,6 +61,12 @@ export default function Signin(props) {
           margin='normal'
         />
         <br />
+        {values.error.data.email && (
+          <Typography component='p' color='error'>
+            {values.error.data.email}
+          </Typography>
+        )}
+        <br />
         <TextField
           id='password'
           type='password'
@@ -67,9 +77,14 @@ export default function Signin(props) {
           margin='normal'
         />
         <br />{' '}
-        {values.error && (
+        {values.error.data.password && (
           <Typography component='p' color='error'>
-            {values.error.data}
+            {values.error.data.password}
+          </Typography>
+        )}
+        {values.error.data.error && (
+          <Typography component='p' color='error'>
+            {values.error.data.error}
           </Typography>
         )}
       </CardContent>

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import jwtDecode from 'jwt-decode';
+import { history } from '../App';
 import setAuthToken from '../setAuthToken';
 import store from '../store';
 import {
@@ -8,9 +9,11 @@ import {
   SET_CURRENT_USER,
 } from './actionTypes';
 
+const productionLink = 'http://localhost:5000';
+
 export const registerUser = (user) => (dispatch) => {
   axios
-    .post('http://localhost:5000/api/users', user)
+    .post(`${productionLink}/api/users`, user)
     .then((res) => {
       dispatch({
         type: INDICATE_NO_ERRORS,
@@ -29,7 +32,7 @@ export const registerUser = (user) => (dispatch) => {
 
 export const loginUser = (user) => (dispatch) => {
   axios
-    .post('http://localhost:5000/auth/signin', user)
+    .post(`${productionLink}/auth/signin`, user)
     .then((res) => {
       const { token } = res.data;
       localStorage.setItem('jwtToken', token);
@@ -50,30 +53,32 @@ export const setCurrentUser = (decoded) => ({
   payload: decoded,
 });
 
-export const updateCurrentUser = (
-  avatar,
-  bio,
-  email,
-  name,
-  userId,
-  showEmail
-) => (dispatch) =>
+export const updateCurrentUser = (updates, userId) => (dispatch) => {
   axios
-    .patch(`/api/users/${userId}`, { avatar, bio, email, name, showEmail })
+    .patch(`${productionLink}/api/users/${userId}`, { updates })
     .then((res) => {
       const { token } = res.data;
       localStorage.setItem('jwtToken', token);
       setAuthToken(token);
       const decoded = jwtDecode(token);
       dispatch(setCurrentUser(decoded));
+      dispatch({
+        type: 'REDIRECT',
+      });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      dispatch({
+        type: GET_ERRORS,
+        payload: err.response.data,
+      });
+    });
+};
 
 export const logoutUser = () => (dispatch) => {
   localStorage.removeItem('jwtToken');
   setAuthToken(false);
   dispatch(setCurrentUser({}));
-  window.location.href = '/';
+  history.push('/');
 };
 
 axios.interceptors.response.use(

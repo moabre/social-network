@@ -8,11 +8,18 @@ import Typography from '@material-ui/core/Typography';
 import Icon from '@material-ui/core/Icon';
 import Avatar from '@material-ui/core/Avatar';
 import FileUpload from '@material-ui/icons/AddPhotoAlternate';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormControl from '@material-ui/core/FormControl';
+import FormLabel from '@material-ui/core/FormLabel';
 import { makeStyles } from '@material-ui/core/styles';
 import { Redirect, Link, useParams } from 'react-router-dom';
 import { getUser } from '../../actions/userActions';
 import { useSelector, useDispatch } from 'react-redux';
 import NavBar from '../NavBar';
+import { updateCurrentUser } from '../../actions/authActions';
+import { history } from '../../App';
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -57,13 +64,15 @@ export default function EditProfile({ match }) {
   const { userId } = useParams();
   const profileUser = userId;
   const state = useSelector((state) => state);
+  const { error } = state;
   const {
     user: { currUser },
   } = state;
 
   const {
     authReducer: {
-      user: { _id, name, avatar },
+      user: { _id },
+      redirectToProfile,
     },
   } = state;
   const loggedInUser = _id;
@@ -72,9 +81,8 @@ export default function EditProfile({ match }) {
     about: '',
     photo: '',
     email: '',
-    password: '',
-    redirectToProfile: false,
-    error: '',
+    showEmail: '',
+    issues: '',
     id: '',
   });
 
@@ -90,36 +98,41 @@ export default function EditProfile({ match }) {
         name: currUser.name,
         email: currUser.email,
         about: currUser.bio,
+        showEmail: String(currUser.showEmail),
       });
     }
   }, [currUser]);
 
+  useEffect(() => {
+    if (error.message) {
+      setValues({ ...values, issues: error });
+    } else if (JSON.stringify(error) !== '{}') {
+      setValues({ ...values, error: error });
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (redirectToProfile) {
+      history.push(`/user/${profileUser}`);
+      dispatch({
+        type: 'CLEAN UP',
+      });
+    }
+  }, [redirectToProfile]);
+
   const clickSubmit = () => {
-    // let userData = new FormData();
-    // values.name && userData.append('name', values.name);
-    // values.email && userData.append('email', values.email);
-    // values.passoword && userData.append('passoword', values.passoword);
-    // values.about && userData.append('about', values.about);
-    // values.photo && userData.append('photo', values.photo);
-    // update(
-    //   {
-    //     userId: match.params.userId,
-    //   },
-    //   {
-    //     t: jwt.token,
-    //   },
-    //   userData
-    // ).then((data) => {
-    //   if (data && data.error) {
-    //     setValues({ ...values, error: data.error });
-    //   } else {
-    //     setValues({ ...values, redirectToProfile: true });
-    //   }
-    // });
+    const equal = values.showEmail === 'true';
+    let updates = {
+      avatar: '',
+      bio: values.about,
+      email: values.email,
+      name: values.name,
+      showEmail: equal ? true : false,
+    };
+    dispatch(updateCurrentUser(updates, loggedInUser));
   };
   const handleChange = (name) => (event) => {
     const value = name === 'photo' ? event.target.files[0] : event.target.value;
-    //userData.set(name, value)
     setValues({ ...values, [name]: value });
   };
   if (loggedInUser !== profileUser) {
@@ -162,6 +175,19 @@ export default function EditProfile({ match }) {
           <span className={classes.filename}>
             {values.photo ? values.photo.name : ''}
           </span>
+          <FormControl component='fieldset'>
+            <FormLabel component='legend'>Show Email</FormLabel>
+            <RadioGroup
+              aria-label='gender'
+              name='gender1'
+              value={values.showEmail}
+              onChange={handleChange('showEmail')}
+              row
+            >
+              <FormControlLabel value='true' control={<Radio />} label='Yes' />
+              <FormControlLabel value='false' control={<Radio />} label='No' />
+            </RadioGroup>
+          </FormControl>
           <br />
           <TextField
             id='name'
@@ -192,23 +218,10 @@ export default function EditProfile({ match }) {
             onChange={handleChange('email')}
             margin='normal'
           />
-          <br />
-          <TextField
-            id='password'
-            type='password'
-            label='Password'
-            className={classes.textField}
-            value={values.password}
-            onChange={handleChange('password')}
-            margin='normal'
-          />
           <br />{' '}
-          {values.error && (
+          {values.issues.message && (
             <Typography component='p' color='error'>
-              <Icon color='error' className={classes.error}>
-                error
-              </Icon>
-              {values.error}
+              {values.issues.message}
             </Typography>
           )}
         </CardContent>
