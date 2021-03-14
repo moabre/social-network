@@ -13,7 +13,7 @@ import {
 } from './actionTypes';
 
 const devLink = process.env.REACT_APP_PRODUCTION_LINK;
-const productionLink = devLink;
+const productionLink = '';
 
 export const addComment = (postId, userId, comment) => (dispatch) =>
   axios
