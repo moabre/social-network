@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import Typography from '@material-ui/core/Typography';
@@ -43,10 +43,11 @@ export default function Newsfeed() {
 
   useEffect(() => {
     dispatch(getPostFeed(_id));
-  }, [dispatch]);
+  }, [_id, dispatch]);
+
   useEffect(() => {
     dispatch(getPostFeed(_id));
-  }, [following, dispatch]);
+  }, [following, _id, dispatch]);
 
   return (
     <Card className={classes.card}>

@@ -6,7 +6,6 @@ import {
   GET_POST_USER,
   GET_POST_FEED,
   CREATE_POST,
-  EDIT_POST,
   DELETE_POST,
   POST_LIKE,
   POST_UNLIKE,
@@ -69,10 +68,11 @@ export const getPostUser = (userId) => (dispatch) => {
     });
 };
 
-export const createPost = (text, userId) => (dispatch) =>
+export const createPost = (text, userId, image) => (dispatch) =>
   axios
     .post(`${productionLink}/api/posts/new/${userId}`, {
       text,
+      image,
     })
     .then((res) => {
       dispatch({
@@ -80,19 +80,6 @@ export const createPost = (text, userId) => (dispatch) =>
         payload: res.data,
       });
     });
-
-export const editPost = (postId, text) => (dispatch) =>
-  axios
-    .put(`${productionLink}/api/posts/edit/${postId}`, { text, postId })
-    .then((res) =>
-      dispatch({
-        type: EDIT_POST,
-        payload: res.data,
-        // id,
-        // text,
-        // author,
-      })
-    );
 
 export const deletePost = (postId) => (dispatch) =>
   axios.delete(`${productionLink}/api/posts/${postId}`).then((res) =>

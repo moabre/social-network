@@ -5,7 +5,6 @@ import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
-import Icon from '@material-ui/core/Icon';
 import Avatar from '@material-ui/core/Avatar';
 import FileUpload from '@material-ui/icons/AddPhotoAlternate';
 import Radio from '@material-ui/core/Radio';
@@ -14,12 +13,13 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
 import { makeStyles } from '@material-ui/core/styles';
-import { Redirect, Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { getUser } from '../../actions/userActions';
 import { useSelector, useDispatch } from 'react-redux';
 import NavBar from '../NavBar';
 import { updateCurrentUser } from '../../actions/authActions';
 import { history } from '../../App';
+import app from '../../firebase';
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -84,11 +84,12 @@ export default function EditProfile({ match }) {
     showEmail: '',
     issues: '',
     id: '',
+    file: '',
   });
 
   useEffect(() => {
     dispatch(getUser(profileUser));
-  }, [profileUser]);
+  }, [profileUser, dispatch]);
 
   useEffect(() => {
     if (JSON.stringify(currUser) !== JSON.stringify({})) {
@@ -98,9 +99,11 @@ export default function EditProfile({ match }) {
         name: currUser.name,
         email: currUser.email,
         about: currUser.bio,
+        photo: currUser.avatar,
         showEmail: String(currUser.showEmail),
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currUser]);
 
   useEffect(() => {
@@ -109,32 +112,55 @@ export default function EditProfile({ match }) {
     } else if (JSON.stringify(error) !== '{}') {
       setValues({ ...values, error: error });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
 
   useEffect(() => {
     if (redirectToProfile) {
+      dispatch(getUser(profileUser));
       history.push(`/user/${profileUser}`);
       dispatch({
         type: 'CLEAN UP',
       });
     }
-  }, [redirectToProfile]);
+  }, [redirectToProfile, dispatch, profileUser]);
 
   const clickSubmit = () => {
-    const equal = values.showEmail === 'true';
-    let updates = {
-      avatar: '',
-      bio: values.about,
-      email: values.email,
-      name: values.name,
-      showEmail: equal ? true : false,
-    };
-    dispatch(updateCurrentUser(updates, loggedInUser));
+    if (values.file) {
+      let file = document.getElementById('icon-button-file').files[0];
+      let storageRef = app.storage().ref('images/' + file.name);
+      storageRef
+        .put(file)
+        .then((snapshot) => snapshot.ref.getDownloadURL())
+        .then((url) => {
+          const equal = values.showEmail === 'true';
+          let updates = {
+            avatar: url,
+            bio: values.about,
+            email: values.email,
+            name: values.name,
+            showEmail: equal ? true : false,
+          };
+          dispatch(updateCurrentUser(updates, loggedInUser));
+        })
+        .catch((err) => console.log(err));
+    } else {
+      const equal = values.showEmail === 'true';
+      let updates = {
+        avatar: values.photo,
+        bio: values.about,
+        email: values.email,
+        name: values.name,
+        showEmail: equal ? true : false,
+      };
+      dispatch(updateCurrentUser(updates, loggedInUser));
+    }
   };
   const handleChange = (name) => (event) => {
-    const value = name === 'photo' ? event.target.files[0] : event.target.value;
+    const value = name === 'file' ? event.target.files[0] : event.target.value;
     setValues({ ...values, [name]: value });
   };
+
   if (loggedInUser !== profileUser) {
     return (
       <>
@@ -157,11 +183,11 @@ export default function EditProfile({ match }) {
           <Typography variant='h6' className={classes.title}>
             Edit Profile
           </Typography>
-          <Avatar src={''} className={classes.bigAvatar} />
+          <Avatar src={currUser.avatar} className={classes.bigAvatar} />
           <br />
           <input
             accept='image/*'
-            onChange={handleChange('photo')}
+            onChange={handleChange('file')}
             className={classes.input}
             id='icon-button-file'
             type='file'
@@ -173,7 +199,7 @@ export default function EditProfile({ match }) {
             </Button>
           </label>{' '}
           <span className={classes.filename}>
-            {values.photo ? values.photo.name : ''}
+            {values.file ? values.file.name : ''}
           </span>
           <FormControl component='fieldset'>
             <FormLabel component='legend'>Show Email</FormLabel>

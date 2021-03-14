@@ -104,7 +104,6 @@ const removeUser = async (req, res) => {
 //Update a users info
 const updateUser = async (req, res) => {
   const userProfile = req.profile;
-  console.log(req.body.updates);
   const updatedInfo = () => {
     if (req.body.updates.email === userProfile.email) {
       let object = {

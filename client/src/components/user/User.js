@@ -17,7 +17,7 @@ import ProfileTabs from './ProfileTabs';
 import { getUser } from '../../actions/userActions';
 import { getPostUser } from '../../actions/postActions';
 import { useSelector, useDispatch } from 'react-redux';
-import { Redirect, Link, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import NavBar from '../NavBar';
 
 const useStyles = makeStyles((theme) => ({
@@ -55,8 +55,6 @@ export default function User({ match }) {
     user: { currUser },
   } = state;
 
-  const { user } = state;
-
   const {
     posts: { posts },
   } = state;
@@ -64,14 +62,14 @@ export default function User({ match }) {
   const loggedInUser = _id;
   const profileUser = userId;
   const [values, setValues] = useState({
-    userRn: { following: [], followers: [], bio: '', _id: '' },
+    userRn: { following: [], followers: [], bio: '', _id: '', avatar: '' },
     following: false,
   });
 
   useEffect(() => {
     dispatch(getUser(profileUser));
     dispatch(getPostUser(profileUser));
-  }, [profileUser]);
+  }, [profileUser, dispatch]);
 
   useEffect(() => {
     if (JSON.stringify(currUser) !== JSON.stringify({})) {
@@ -82,14 +80,16 @@ export default function User({ match }) {
           followers: currUser.followers,
           bio: currUser.bio,
           _id: currUser._id,
+          avatar: currUser.avatar,
         },
         following: checkFollowing(currUser, loggedInUser),
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currUser]);
 
   const checkFollowing = (user, userId) => {
-    const match = user.followers.some((follower) => follower._id == userId);
+    const match = user.followers.some((follower) => follower._id === userId);
     return match;
   };
 
@@ -100,35 +100,7 @@ export default function User({ match }) {
     });
   };
 
-  // const loadPosts = (user) => {
-  //   listByUser(
-  //     {
-  //       userId: user,
-  //     },
-  //     {
-  //       t: jwt.token,
-  //     }
-  //   ).then((data) => {
-  //     if (data.error) {
-  //       console.log(data.error);
-  //     } else {
-  //       setPosts(data);
-  //     }
-  //   });
-  // };
-  // const removePost = (post) => {
-  //   const updatedPosts = posts;
-  //   const index = updatedPosts.indexOf(post);
-  //   updatedPosts.splice(index, 1);
-  //   setPosts(updatedPosts);
-  // };
-
-  // const photoUrl = values.user._id
-  //   ? `/api/users/photo/${values.user._id}?${new Date().getTime()}`
-  //   : '/api/users/defaultphoto';
-  // if (values.redirectToSignin) {
-  //   return <Redirect to='/signin' />;
-  // }
+  console.log(values);
   return (
     <>
       <NavBar />
@@ -139,7 +111,10 @@ export default function User({ match }) {
         <List dense>
           <ListItem>
             <ListItemAvatar>
-              <Avatar src={''} className={classes.bigAvatar} />
+              <Avatar
+                src={values.userRn.avatar}
+                className={classes.bigAvatar}
+              />
             </ListItemAvatar>
             <ListItemText primary={currUser.name} secondary={currUser.email} />{' '}
             {_id === currUser._id ? (

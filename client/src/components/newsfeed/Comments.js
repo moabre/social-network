@@ -45,7 +45,7 @@ export default function Comments({ postId, comments }) {
   const state = useSelector((state) => state);
   const {
     authReducer: {
-      user: { _id },
+      user: { _id, avatar },
     },
   } = state;
 
@@ -54,7 +54,7 @@ export default function Comments({ postId, comments }) {
   };
 
   const addsComment = (event) => {
-    if (event.keyCode == 13 && event.target.value) {
+    if (event.keyCode === 13 && event.target.value) {
       event.preventDefault();
       const comment = {
         text: text,
@@ -70,15 +70,20 @@ export default function Comments({ postId, comments }) {
     };
     dispatch(deleteComment(comment, postId));
   };
-
-  console.log(comments);
-
   const commentBody = (item) => {
     return (
       <p className={classes.commentText}>
         {item.postedBy ? (
           <>
-            <Link to={'/user/' + item.postedBy._id}>{item.postedBy.name}</Link>
+            <Link
+              to={'/user/' + item.postedBy._id}
+              style={{
+                textDecoration: 'none',
+                color: 'black',
+              }}
+            >
+              {item.postedBy.name}
+            </Link>
             <br />
             {item.text}
             <span className={classes.commentDate}>
@@ -109,7 +114,7 @@ export default function Comments({ postId, comments }) {
   return (
     <div>
       <CardHeader
-        avatar={<Avatar className={classes.smallAvatar} src={''} />}
+        avatar={<Avatar className={classes.smallAvatar} src={avatar} />}
         title={
           <TextField
             onKeyDown={addsComment}
@@ -126,7 +131,12 @@ export default function Comments({ postId, comments }) {
       {comments.map((item, i) => {
         return (
           <CardHeader
-            avatar={<Avatar className={classes.smallAvatar} src={''} />}
+            avatar={
+              <Avatar
+                className={classes.smallAvatar}
+                src={item.postedBy.avatar}
+              />
+            }
             title={commentBody(item)}
             className={classes.cardHeader}
             key={i}

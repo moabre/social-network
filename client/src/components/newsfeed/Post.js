@@ -78,6 +78,7 @@ export default function Post(props) {
       likes: props.post.likers.length,
       comments: props.post.comments,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [posts]);
 
   const clickLike = () => {
@@ -91,7 +92,6 @@ export default function Post(props) {
   const deletePosts = () => {
     dispatch(deletePost(props.post._id));
   };
-
   return (
     <Card className={classes.card}>
       <CardHeader
@@ -104,7 +104,13 @@ export default function Post(props) {
           )
         }
         title={
-          <Link to={'/user/' + props.post.postedBy._id}>
+          <Link
+            to={'/user/' + props.post.postedBy._id}
+            style={{
+              textDecoration: 'none',
+              color: 'black',
+            }}
+          >
             {props.post.postedBy.name}
           </Link>
         }
@@ -115,12 +121,9 @@ export default function Post(props) {
         <Typography component='p' className={classes.text}>
           {props.post.text}
         </Typography>
-        {props.post.photo && (
+        {props.post.image && (
           <div className={classes.photo}>
-            <img
-              className={classes.media}
-              src={'/api/posts/photo/' + props.post._id}
-            />
+            <img className={classes.media} alt='' src={props.post.image} />
           </div>
         )}
       </CardContent>

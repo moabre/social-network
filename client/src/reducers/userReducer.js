@@ -5,7 +5,6 @@ import {
   UPDATE_FOLLOWING,
   LOGIN_USER,
 } from '../actions/actionTypes';
-import { useSelector } from 'react-redux';
 
 const initialState = {
   recommended: [],

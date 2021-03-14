@@ -5,7 +5,6 @@ import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
-import Icon from '@material-ui/core/Icon';
 import SignInStyles from '../styles/SignInStyles';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser } from '../actions/authActions';
@@ -22,7 +21,6 @@ export default function Signin(props) {
     error: {
       data: '',
     },
-    redirectToReferrer: false,
   });
 
   const clickSubmit = () => {
@@ -30,7 +28,6 @@ export default function Signin(props) {
       email: values.email || undefined,
       password: values.password || undefined,
     };
-
     dispatch(loginUser(user));
   };
 
@@ -46,6 +43,7 @@ export default function Signin(props) {
     if (JSON.stringify(error) !== '{}') {
       setValues({ ...values, error: error });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
 
   return (

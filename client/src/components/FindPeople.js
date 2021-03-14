@@ -58,15 +58,14 @@ export default function FindPeople() {
     open: false,
     followMessage: '',
   });
+  const [users, setUsers] = useState([]);
 
   useEffect(() => {
     dispatch(getRecommended(_id));
   }, [dispatch, _id]);
+
   useEffect(() => {
-    setValues({
-      ...values,
-      users: recommended,
-    });
+    setUsers(recommended);
   }, [recommended]);
 
   const clickFollow = (user, index) => {
@@ -81,6 +80,7 @@ export default function FindPeople() {
   const handleRequestClose = (event, reason) => {
     setValues({ ...values, open: false });
   };
+
   return (
     <div>
       <Paper className={classes.root} elevation={4}>
@@ -88,7 +88,7 @@ export default function FindPeople() {
           Who to follow
         </Typography>
         <List>
-          {values.users.map((item, i) => {
+          {users.map((item, i) => {
             return (
               <span key={i}>
                 <ListItem>

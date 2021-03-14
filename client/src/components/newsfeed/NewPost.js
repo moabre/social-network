@@ -13,6 +13,7 @@ import IconButton from '@material-ui/core/IconButton';
 import PhotoCamera from '@material-ui/icons/PhotoCamera';
 import { useDispatch, useSelector } from 'react-redux';
 import { createPost } from '../../actions/postActions';
+import app from '../../firebase';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -70,26 +71,44 @@ export default function NewPost(props) {
   });
   useEffect(() => {
     setValues({ ...values, userCurrent: user });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const clickPost = () => {
-    dispatch(createPost(values.text, user._id));
-    setValues({
-      ...values,
-      text: '',
-    });
+    if (values.photo) {
+      let file = document.getElementById('icon-button-file').files[0];
+      let storageRef = app.storage().ref('images/' + file.name);
+      storageRef
+        .put(file)
+        .then((snapshot) => snapshot.ref.getDownloadURL())
+        .then((url) => {
+          const text = values.text;
+          const photo = url;
+          dispatch(createPost(text, user._id, photo));
+          setValues({
+            ...values,
+            text: '',
+            photo: '',
+          });
+        })
+        .catch((err) => console.log(err));
+    } else {
+      dispatch(createPost(values.text, user._id));
+      setValues({
+        ...values,
+        text: '',
+      });
+    }
   };
   const handleChange = (name) => (event) => {
     const value = name === 'photo' ? event.target.files[0] : event.target.value;
     setValues({ ...values, [name]: value });
   };
-  const photoURL = values.userCurrent._id
-    ? '/api/users/photo/' + values.userCurrent._id
-    : '/api/users/defaultphoto';
+
   return (
     <div className={classes.root}>
       <Card className={classes.card}>
         <CardHeader
-          avatar={<Avatar src={photoURL} />}
+          avatar={<Avatar src={user.avatar} />}
           title={user.name}
           className={classes.cardHeader}
         />

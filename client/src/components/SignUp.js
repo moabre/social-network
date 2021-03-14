@@ -5,7 +5,6 @@ import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
-import Icon from '@material-ui/core/Icon';
 import { makeStyles } from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -94,6 +93,7 @@ export default function Signup() {
     } else if (JSON.stringify(error) !== '{}') {
       setValues({ ...values, error: error });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
 
   return (

@@ -1,7 +1,7 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
-import { unfollowUser, followUser, getUser } from '../../actions/userActions';
-import { useDispatch, useSelector } from 'react-redux';
+import { unfollowUser, followUser } from '../../actions/userActions';
+import { useDispatch } from 'react-redux';
 
 export default function FollowProfileButton({
   userId,
