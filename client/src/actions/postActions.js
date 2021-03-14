@@ -12,7 +12,8 @@ import {
   GET_ERRORS,
 } from './actionTypes';
 
-const productionLink = '';
+const devLink = process.env.REACT_APP_PRODUCTION_LINK;
+const productionLink = devLink;
 
 export const addComment = (postId, userId, comment) => (dispatch) =>
   axios
