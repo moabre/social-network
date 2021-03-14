@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
   }),
   title: {
     margin: `${theme.spacing(3)}px ${theme.spacing(1)}px ${theme.spacing(2)}px`,
-    color: theme.palette.openTitle,
+    color: 'black',
     fontSize: '1em',
   },
   avatar: {
@@ -89,11 +89,12 @@ export default function FindPeople() {
         </Typography>
         <List>
           {users.map((item, i) => {
+            console.log(item);
             return (
               <span key={i}>
                 <ListItem>
                   <ListItemAvatar className={classes.avatar}>
-                    <Avatar src={'/api/users/photo/' + item._id} />
+                    <Avatar src={item.avatar} />
                   </ListItemAvatar>
                   <ListItemText primary={item.name} />
                   <ListItemSecondaryAction className={classes.follow}>

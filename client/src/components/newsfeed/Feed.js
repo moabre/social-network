@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
     padding: `${theme.spacing(3)}px ${theme.spacing(2.5)}px ${theme.spacing(
       2
     )}px`,
-    color: theme.palette.openTitle,
+    color: 'black',
     fontSize: '1em',
   },
   media: {

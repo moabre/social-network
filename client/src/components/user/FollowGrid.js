@@ -36,13 +36,11 @@ export default function FollowGrid(props) {
     <div className={classes.root}>
       <GridList cellHeight={160} className={classes.gridList} cols={4}>
         {props.people.map((person, i) => {
+          console.log(person);
           return (
             <GridListTile style={{ height: 120 }} key={i}>
               <Link to={'/user/' + person._id}>
-                <Avatar
-                  src={'/api/users/photo/' + person._id}
-                  className={classes.bigAvatar}
-                />
+                <Avatar src={person.avatar} className={classes.bigAvatar} />
                 <Typography className={classes.tileText}>
                   {person.name}
                 </Typography>
