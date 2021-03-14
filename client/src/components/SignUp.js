@@ -14,6 +14,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { registerUser } from '../actions/authActions';
+import { history } from '../App';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -84,6 +85,7 @@ export default function Signup() {
   };
 
   const home = () => {
+    history.push('/');
     window.location.href = '/';
   };
 
@@ -188,7 +190,13 @@ export default function Signup() {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Link to='/signin'>
+          <Link
+            to='/'
+            style={{
+              textDecoration: 'none',
+              color: 'black',
+            }}
+          >
             <Button
               color='primary'
               autoFocus='autoFocus'

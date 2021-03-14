@@ -100,7 +100,6 @@ export default function User({ match }) {
     });
   };
 
-  console.log(values);
   return (
     <>
       <NavBar />
