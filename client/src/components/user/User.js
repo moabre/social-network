@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
   }),
   title: {
     margin: `${theme.spacing(2)}px ${theme.spacing(1)}px 0`,
-    color: theme.palette.protectedTitle,
+    color: 'black',
     fontSize: '1em',
   },
   bigAvatar: {

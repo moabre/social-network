@@ -9,7 +9,7 @@ import {
   SET_CURRENT_USER,
 } from './actionTypes';
 
-const productionLink = 'http://localhost:5000';
+const productionLink = '';
 
 export const registerUser = (user) => (dispatch) => {
   axios

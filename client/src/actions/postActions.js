@@ -12,7 +12,7 @@ import {
   GET_ERRORS,
 } from './actionTypes';
 
-const productionLink = 'http://localhost:5000';
+const productionLink = '';
 
 export const addComment = (postId, userId, comment) => (dispatch) =>
   axios

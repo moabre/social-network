@@ -10,7 +10,7 @@ import {
 import setAuthToken from '../setAuthToken';
 import { setCurrentUser } from './authActions';
 
-const productionLink = 'http://localhost:5000';
+const productionLink = '';
 export const followUser = (userId, idToFollow) => (dispatch) => {
   axios
     .put(`${productionLink}/api/users/follow`, {

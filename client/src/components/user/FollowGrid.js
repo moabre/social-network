@@ -1,6 +1,5 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import PropTypes from 'prop-types';
 import Avatar from '@material-ui/core/Avatar';
 import Typography from '@material-ui/core/Typography';
 import { Link } from 'react-router-dom';
@@ -39,7 +38,13 @@ export default function FollowGrid(props) {
           console.log(person);
           return (
             <GridListTile style={{ height: 120 }} key={i}>
-              <Link to={'/user/' + person._id}>
+              <Link
+                to={'/user/' + person._id}
+                style={{
+                  textDecoration: 'none',
+                  color: 'black',
+                }}
+              >
                 <Avatar src={person.avatar} className={classes.bigAvatar} />
                 <Typography className={classes.tileText}>
                   {person.name}
