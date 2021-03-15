@@ -115,7 +115,10 @@ export default function User({ match }) {
                 className={classes.bigAvatar}
               />
             </ListItemAvatar>
-            <ListItemText primary={currUser.name} secondary={currUser.email} />{' '}
+            <ListItemText
+              primary={currUser.name}
+              secondary={currUser.showEmail ? currUser.email : null}
+            />{' '}
             {_id === currUser._id ? (
               <ListItemSecondaryAction>
                 <Link to={`/user/edit/${values.userRn._id}`}>

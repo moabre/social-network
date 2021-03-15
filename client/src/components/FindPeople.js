@@ -89,7 +89,6 @@ export default function FindPeople() {
         </Typography>
         <List>
           {users.map((item, i) => {
-            console.log(item);
             return (
               <span key={i}>
                 <ListItem>
